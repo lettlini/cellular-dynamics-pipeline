@@ -110,13 +110,7 @@ if __name__ == "__main__":
         help="Stardist probability threshold",
     )
     parser.add_argument(
-        "--mum_per_px",
-        required=True,
-        type=float,
-        help="Micrometer per pixel",
-    )
-    parser.add_argument(
-        "--min_nucleus_area_mumsq",
+        "--min_nucleus_area_pxsq",
         required=True,
         type=float,
         help="Nuclei smaller than 'min_nucleus_area_mumsq' will be removed",
@@ -124,14 +118,12 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    min_nucleus_area_px2: float = args.min_nucleus_area_mumsq / (args.mum_per_px**2)
-
     with open(args.infile, "rb") as read_f:
         x = pickle.load(read_f)
 
     x = StarDistSegmentationTransform(prob_threshold=args.stardist_probility_threshold)(
         x
     )
-    x = RemoveSmallObjectsTransform(min_nucleus_area_px2)(x)
+    x = RemoveSmallObjectsTransform(args.min_nucleus_area_pxsq)(x)
 
     x.to_pickle(args.outfile)

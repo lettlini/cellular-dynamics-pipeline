@@ -1,3 +1,6 @@
+params.min_nucleus_area_pxsq = params.min_nucleus_area_mumsq / (params.mum_per_px ** 2)
+params.cell_cutoff_px = params.cell_cutoff_mum / params.mum_per_px
+
 workflow {
     input_datasets = Channel.fromPath("${params.in_pdir}/*", type: "dir")
 
@@ -71,7 +74,6 @@ process nuclei_segmentation {
         --infile="${fpath}" \
         --outfile="nuclei_segmentation.pickle" \
         --stardist_probility_threshold=${params.stardist_probality_threshold} \
-        --mum_per_px=${params.mum_per_px} \
-        --min_nucleus_area_mumsq=${params.min_nucleus_area_mumsq}
+        --min_nucleus_area_pxsq=${params.min_nucleus_area_pxsq}
     """
 }
