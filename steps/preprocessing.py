@@ -12,9 +12,8 @@ from core_data_utils.transformations import BaseDataSetTransformation
 class MinMaxScaleTransform(BaseDataSetTransformation):
     def _transform_single_entry(self, entry: BaseDataSetEntry) -> BaseDataSetEntry:
 
-        image = entry.data
+        new_image = entry.data
 
-        new_image = image.copy()
         minval, maxval = np.min(new_image), np.max(new_image)
         new_image = (new_image - minval) / (maxval - minval)
 
@@ -30,7 +29,7 @@ class GrayScaleTransform(BaseDataSetTransformation):
 
         image = entry.data
 
-        new_image = image.copy().mean(axis=2)
+        new_image = image.mean(axis=2)
         return BaseDataSetEntry(identifier=entry.identifier, data=new_image)
 
     def _post_processing(self, data_dict: dict[str, Any]) -> Any:
