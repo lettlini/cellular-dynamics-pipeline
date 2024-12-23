@@ -1,8 +1,7 @@
 from argparse import ArgumentParser
 
-
-from core_data_utils.datasets.image import ImageDataset
 from core_data_utils.datasets import BaseDataSet, BaseDataSetEntry
+from core_data_utils.datasets.image import ImageDataset
 from core_data_utils.transformations import BaseFilter
 
 

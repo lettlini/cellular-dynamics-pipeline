@@ -1,11 +1,10 @@
+import pickle
 from argparse import ArgumentParser
 from typing import Any
-import pickle
 
 import numpy as np
-
-from core_data_utils.datasets.image import ImageDataset
 from core_data_utils.datasets import BaseDataSetEntry
+from core_data_utils.datasets.image import ImageDataset
 from core_data_utils.transformations import BaseDataSetTransformation
 
 
