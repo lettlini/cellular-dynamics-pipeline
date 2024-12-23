@@ -1,0 +1,33 @@
+name: cmot-pipeline
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.11
+  - pip
+  - openjdk # this is needed for nextflow
+  - pip:
+    - networkx
+    - nextflow
+    - opencv-python
+    - tqdm
+    - numpy<2
+    - scipy
+    - polars
+    - stardist
+    - tensorflow-cpu
+    - black[jupyter]
+    - isort
+    - torch
+    - torchvision
+    - torchaudio
+    - torch-scatter
+    - torch-sparse
+    - torch-cluster
+    - torch-spline-conv
+    - torch-geometric
+    - --extra-index-url https://download.pytorch.org/whl/cu124
+    - --find-links https://data.pyg.org/whl/torch-2.5.0+cu124.html
+    - -e /home/klettl/Development/github/overlap-tracking
+    - -e /home/klettl/Development/github/core-data-utils
+
