@@ -1,9 +1,5 @@
 import os
 
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = (
-    "3"  # prevent stardist / tensorflow from complaining
-)
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 import pickle
 from argparse import ArgumentParser
 
@@ -13,6 +9,11 @@ from core_data_utils.datasets import BaseDataSetEntry
 from core_data_utils.datasets.image import ImageDataset
 from core_data_utils.transformations import BaseDataSetTransformation
 from stardist.models import StarDist2D
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = (
+    "3"  # prevent stardist / tensorflow from complaining
+)
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 
 class StarDistSegmentationTransform(BaseDataSetTransformation):
