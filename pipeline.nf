@@ -14,6 +14,7 @@ workflow {
     preprocess(
         load_and_filter.out.results
     )
+    nuclei_segmentation(preprocess.out.results)
 }
 
 process load_and_filter {
@@ -51,5 +52,26 @@ process preprocess {
     python ${projectDir}/steps/preprocessing.py \
         --infile="${fpath}" \
         --outfile="preprocessed.pickle" \
+    """
+}
+
+process nuclei_segmentation {
+    maxForks 1
+    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
+
+    input:
+    tuple path(fpath), val(basename)
+
+    output:
+    tuple path("nuclei_segmentation.pickle"), val(basename), emit: results
+
+    script:
+    """
+    python ${projectDir}/steps/nuclei_segmentation.py \
+        --infile="${fpath}" \
+        --outfile="nuclei_segmentation.pickle" \
+        --stardist_probility_threshold=${params.stardist_probality_threshold} \
+        --mum_per_px=${params.mum_per_px} \
+        --min_nucleus_area_mumsq=${params.min_nucleus_area_mumsq}
     """
 }
