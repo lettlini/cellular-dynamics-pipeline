@@ -11,13 +11,14 @@ workflow {
         [dir, basename]
     }
 
-    input_datasets.view { "Input file: ${it}" }
+    // input_datasets.view { "Input file: ${it}" }
 
     load_and_filter(input_datasets)
     preprocess(
         load_and_filter.out.results
     )
-    nuclei_segmentation(preprocess.out.results)
+    nuclei_segmentation(preprocess.out.results).collect(flat: false)
+    cell_approximation(nuclei_segmentation.out.results)
 }
 
 process load_and_filter {
@@ -75,5 +76,25 @@ process nuclei_segmentation {
         --outfile="nuclei_segmentation.pickle" \
         --stardist_probility_threshold=${params.stardist_probality_threshold} \
         --min_nucleus_area_pxsq=${params.min_nucleus_area_pxsq}
+    """
+}
+
+process cell_approximation {
+    maxForks 2
+
+    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
+
+    input:
+    tuple path(fpath), val(basename)
+
+    output:
+    tuple path("cell_approximation.pickle"), val(basename), emit: result
+
+    script:
+    """
+    python ${projectDir}/steps/cell_approximation.py \
+        --infile="${fpath}" \
+        --outfile="cell_approximation.pickle" \
+        --cell_cutoff_px=${params.cell_cutoff_px}
     """
 }
