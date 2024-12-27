@@ -26,6 +26,7 @@ workflow {
 
     structure_abstraction(label_nuclei_segmentation.out.results, label_cell_approximation.out.results)
 
+    track_cells(cell_approximation.out.results, structure_abstraction.out.results)
 }
 
 process load_and_filter {
@@ -157,5 +158,24 @@ process label_nuclei_segmentation {
     python ${projectDir}/steps/label_objects.py \
         --infile=${fpath} \
         --outfile="nuclei_labelled.pickle"
+    """
+}
+
+process track_cells {
+    publishDir "${params.out_pdir}/${cell_basename}", mode: 'copy'
+
+    input:
+    tuple path(cell_approximation_fpath), val(cell_basename)
+    tuple path(abstract_structure_fpath), val(as_basename)
+
+    output:
+    tuple path("tracked_abstract_structure.pickle"), val(cell_basename), emit: results
+
+    script:
+    """
+    python ${projectDir}/steps/track_cells.py \
+        --cell_label_file=${cell_approximation_fpath} \
+        --abstract_structure_file=${abstract_structure_fpath} \
+        --outfile="tracked_abstract_structure.pickle"
     """
 }
