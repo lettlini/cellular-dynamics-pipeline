@@ -19,6 +19,14 @@ workflow {
     )
     nuclei_segmentation(preprocess.out.results).collect(flat: false)
     cell_approximation(nuclei_segmentation.out.results)
+
+
+    label_cell_approximation(cell_approximation.out.results)
+    label_nuclei_segmentation(nuclei_segmentation.out.results)
+
+    structure_abstraction(label_nuclei_segmentation.out.results, label_cell_approximation.out.results)
+
+    track_cells(cell_approximation.out.results, structure_abstraction.out.results)
 }
 
 process load_and_filter {
@@ -88,7 +96,7 @@ process cell_approximation {
     tuple path(fpath), val(basename)
 
     output:
-    tuple path("cell_approximation.pickle"), val(basename), emit: result
+    tuple path("cell_approximation.pickle"), val(basename), emit: results
 
     script:
     """
@@ -96,5 +104,78 @@ process cell_approximation {
         --infile="${fpath}" \
         --outfile="cell_approximation.pickle" \
         --cell_cutoff_px=${params.cell_cutoff_px}
+    """
+}
+
+process structure_abstraction {
+    publishDir "${params.out_pdir}/${cell_basename}", mode: 'copy'
+
+    input:
+    tuple path(nuclei_fpath), val(nuclei_basename)
+    tuple path(cell_fpath), val(cell_basename)
+
+    output:
+    tuple path("abstract_structure.pickle"), val(nuclei_basename), emit: results
+
+    script:
+    """
+    python ${projectDir}/steps/structure_abstraction.py \
+        --nuclei_infile="${nuclei_fpath}" \
+        --cells_infile="${cell_fpath}" \
+        --mum_per_px=${params.mum_per_px} \
+        --outfile="abstract_structure.pickle"
+    """
+}
+
+process label_cell_approximation {
+    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
+
+    input:
+    tuple path(fpath), val(basename)
+
+    output:
+    tuple path("cells_labelled.pickle"), val(basename), emit: results
+
+    script:
+    """
+    python ${projectDir}/steps/label_objects.py \
+        --infile=${fpath} \
+        --outfile="cells_labelled.pickle"
+    """
+}
+
+process label_nuclei_segmentation {
+    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
+
+    input:
+    tuple path(fpath), val(basename)
+
+    output:
+    tuple path("nuclei_labelled.pickle"), val(basename), emit: results
+
+    script:
+    """
+    python ${projectDir}/steps/label_objects.py \
+        --infile=${fpath} \
+        --outfile="nuclei_labelled.pickle"
+    """
+}
+
+process track_cells {
+    publishDir "${params.out_pdir}/${cell_basename}", mode: 'copy'
+
+    input:
+    tuple path(cell_approximation_fpath), val(cell_basename)
+    tuple path(abstract_structure_fpath), val(as_basename)
+
+    output:
+    tuple path("tracked_abstract_structure.pickle"), val(cell_basename), emit: results
+
+    script:
+    """
+    python ${projectDir}/steps/track_cells.py \
+        --cell_label_file=${cell_approximation_fpath} \
+        --abstract_structure_file=${abstract_structure_fpath} \
+        --outfile="tracked_abstract_structure.pickle"
     """
 }
