@@ -1,7 +1,7 @@
 import pickle
 from argparse import ArgumentParser
 
-from core_data_utils.datasets import BaseDataSetEntry
+from core_data_utils.datasets import BaseDataSetEntry, BaseDataSet
 from core_data_utils.transformations import BaseDataSetTransformation
 from core_data_utils.datasets.image import ImageDataset
 
@@ -93,9 +93,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    with open(args.infile, "rb") as read_f:
-        x = pickle.load(read_f)
+    x = BaseDataSet.from_pickle(args.infile)
 
-    x = CellApproximationTransform(cell_cutoff_px=args.cell_cutoff_px)(x)
+    x = CellApproximationTransform(cell_cutoff_px=args.cell_cutoff_px)(dataset=x)
 
     x.to_pickle(args.outfile)

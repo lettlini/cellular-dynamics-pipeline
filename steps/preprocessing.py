@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 from typing import Any
 
 import numpy as np
-from core_data_utils.datasets import BaseDataSetEntry
+from core_data_utils.datasets import BaseDataSetEntry, BaseDataSet
 from core_data_utils.datasets.image import ImageDataset
 from core_data_utils.transformations import BaseDataSetTransformation
 
@@ -45,8 +45,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    with open(args.infile, "rb") as read_f:
-        x = pickle.load(read_f)
+    x = BaseDataSet.from_pickle(args.infile)
 
     x = GrayScaleTransform()(x)
     x = MinMaxScaleTransform()(x)

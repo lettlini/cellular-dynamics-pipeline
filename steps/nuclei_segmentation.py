@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 
 import cv2
 import numpy as np
-from core_data_utils.datasets import BaseDataSetEntry
+from core_data_utils.datasets import BaseDataSetEntry, BaseDataSet
 from core_data_utils.datasets.image import ImageDataset
 from core_data_utils.transformations import BaseDataSetTransformation
 from stardist.models import StarDist2D
@@ -118,12 +118,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    with open(args.infile, "rb") as read_f:
-        x = pickle.load(read_f)
+    x = BaseDataSet.from_pickle(args.infile)
 
     x = StarDistSegmentationTransform(prob_threshold=args.stardist_probility_threshold)(
-        x
+        dataset=x
     )
-    x = RemoveSmallObjectsTransform(args.min_nucleus_area_pxsq)(x)
+    x = RemoveSmallObjectsTransform(args.min_nucleus_area_pxsq)(dataset=x)
 
     x.to_pickle(args.outfile)
