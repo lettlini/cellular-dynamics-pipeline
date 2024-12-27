@@ -2,7 +2,7 @@ params.min_nucleus_area_pxsq = params.min_nucleus_area_mumsq / (params.mum_per_p
 params.cell_cutoff_px = params.cell_cutoff_mum / params.mum_per_px
 
 workflow {
-    input_datasets = Channel.fromPath("${params.in_pdir}/*", type: "dir")
+    input_datasets = Channel.fromPath("${params.in_pdir}", type: "dir")
 
     // Transform the channel to emit both the directory and its basename
     // This creates a tuple channel: [dir, basename]
