@@ -23,6 +23,9 @@ workflow {
 
     label_cell_approximation(cell_approximation.out.results)
     label_nuclei_segmentation(nuclei_segmentation.out.results)
+
+    structure_abstraction(label_nuclei_segmentation.out.results, label_cell_approximation.out.results)
+
 }
 
 process load_and_filter {
@@ -102,6 +105,27 @@ process cell_approximation {
         --cell_cutoff_px=${params.cell_cutoff_px}
     """
 }
+
+process structure_abstraction {
+    publishDir "${params.out_pdir}/${cell_basename}", mode: 'copy'
+
+    input:
+    tuple path(nuclei_fpath), val(nuclei_basename)
+    tuple path(cell_fpath), val(cell_basename)
+
+    output:
+    tuple path("abstract_structure.pickle"), val(nuclei_basename), emit: results
+
+    script:
+    """
+    python ${projectDir}/steps/structure_abstraction.py \
+        --nuclei_infile="${nuclei_fpath}" \
+        --cells_infile="${cell_fpath}" \
+        --mum_per_px=${params.mum_per_px} \
+        --outfile="abstract_structure.pickle"
+    """
+}
+
 process label_cell_approximation {
     publishDir "${params.out_pdir}/${basename}", mode: 'copy'
 
