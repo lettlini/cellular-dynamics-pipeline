@@ -26,7 +26,7 @@ workflow {
 
     structure_abstraction(label_nuclei_segmentation.out.results, label_cell_approximation.out.results)
 
-    track_cells(cell_approximation.out.results, structure_abstraction.out.results)
+    track_cells(label_cell_approximation.out.results, structure_abstraction.out.results)
 }
 
 process load_and_filter {
