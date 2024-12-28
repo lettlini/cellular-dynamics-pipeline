@@ -8,7 +8,6 @@ from tqdm import trange
 
 
 class OverlapTrackingTransformation:
-
     def __init__(self, labels_to_ignore: Iterable[int]) -> None:
         self._ignore_labels = labels_to_ignore
 

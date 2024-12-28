@@ -8,7 +8,6 @@ from core_data_utils.transformations import BaseDataSetTransformation
 
 
 class BuildGraphTransform(BaseDataSetTransformation):
-
     def __init__(
         self,
         mum_px: float,
@@ -76,7 +75,6 @@ class BuildGraphTransform(BaseDataSetTransformation):
 
 
 class CalculateCellNucleusShapeTransformation(BaseDataSetTransformation):
-
     def _transform_single_entry(self, entry: BaseDataSetEntry) -> BaseDataSetEntry:
         graph = entry.data
 
@@ -96,7 +94,6 @@ class CalculateCellNucleusShapeTransformation(BaseDataSetTransformation):
 
 
 class CalculateOrderParameter(BaseDataSetTransformation):
-
     def __init__(self, angle_prop: str, save_prop_prefix: str) -> None:
         self._angle_property = angle_prop
         self._save_property_prefix = save_prop_prefix
@@ -155,15 +152,16 @@ class CalculateOrderParameter(BaseDataSetTransformation):
                     np.array([np.cos(cangle), np.sin(cangle)])
                 )
 
-            order_parameter_S, Q_tensor = (
-                CalculateOrderParameter.calculate_order_parameter(
-                    neighborhood_local_directors
-                )
+            (
+                order_parameter_S,
+                Q_tensor,
+            ) = CalculateOrderParameter.calculate_order_parameter(
+                neighborhood_local_directors
             )
 
-            nodedata[f"{self._save_property_prefix}_nematic_order_parameter_S"] = (
-                order_parameter_S
-            )
+            nodedata[
+                f"{self._save_property_prefix}_nematic_order_parameter_S"
+            ] = order_parameter_S
             nodedata[f"{self._save_property_prefix}_Q_tensor"] = Q_tensor
 
         return BaseDataSetEntry(identifier=entry.identifier, data=current_graph)

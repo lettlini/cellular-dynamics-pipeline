@@ -71,7 +71,6 @@ class ObjectInformationTransform(BaseDataSetTransformation):
 
 
 class MergeCellNucleiInformation(BaseMultiDataSetTransformation):
-
     def _transform_single_entry(self, entry: BaseDataSetEntry) -> BaseDataSetEntry:
 
         nuc_labelim = entry.data["nuclei_labels"]

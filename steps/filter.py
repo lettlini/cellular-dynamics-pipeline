@@ -6,7 +6,6 @@ from core_data_utils.transformations import BaseFilter
 
 
 class FirstLastFilter(BaseFilter):
-
     def __init__(self, first_n: int, last_m: int) -> None:
 
         # set filter parameters

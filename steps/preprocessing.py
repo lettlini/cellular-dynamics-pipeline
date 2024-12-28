@@ -23,7 +23,6 @@ class MinMaxScaleTransform(BaseDataSetTransformation):
 
 
 class GrayScaleTransform(BaseDataSetTransformation):
-
     def _transform_single_entry(self, entry: BaseDataSetEntry) -> BaseDataSetEntry:
 
         image = entry.data
