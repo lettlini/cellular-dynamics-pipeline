@@ -27,6 +27,8 @@ workflow {
     structure_abstraction(label_nuclei_segmentation.out.results, label_cell_approximation.out.results)
 
     track_cells(label_cell_approximation.out.results, structure_abstraction.out.results)
+
+    build_graphs(track_cells.out.results)
 }
 
 process load_and_filter {
@@ -177,5 +179,23 @@ process track_cells {
         --cell_label_file=${cell_approximation_fpath} \
         --abstract_structure_file=${abstract_structure_fpath} \
         --outfile="tracked_abstract_structure.pickle"
+    """
+}
+
+process build_graphs {
+    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
+
+    input:
+    tuple path(abstract_structure_fpath), val(basename)
+
+    output:
+    tuple path("graph_dataset.pickle"), val(basename), emit: results
+
+    script:
+    """
+    python ${projectDir}/steps/build_graphs.py \
+        --infile=${abstract_structure_fpath} \
+        --mum_per_px=${params.mum_per_px} \
+        --outfile="graph_dataset.pickle"
     """
 }
