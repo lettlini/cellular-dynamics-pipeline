@@ -1,9 +1,9 @@
-from core_data_utils.datasets import BaseDataSet, BaseDataSetEntry
-from core_data_utils.transformations import BaseMultiDataSetTransformation
-
-import overlap_tracking
 from argparse import ArgumentParser
 from typing import Iterable
+
+import overlap_tracking
+from core_data_utils.datasets import BaseDataSet, BaseDataSetEntry
+from core_data_utils.transformations import BaseMultiDataSetTransformation
 from tqdm import trange
 
 
