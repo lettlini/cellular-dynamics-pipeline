@@ -159,9 +159,9 @@ class CalculateOrderParameter(BaseDataSetTransformation):
                 neighborhood_local_directors
             )
 
-            nodedata[
-                f"{self._save_property_prefix}_nematic_order_parameter_S"
-            ] = order_parameter_S
+            nodedata[f"{self._save_property_prefix}_nematic_order_parameter_S"] = (
+                order_parameter_S
+            )
             nodedata[f"{self._save_property_prefix}_Q_tensor"] = Q_tensor
 
         return BaseDataSetEntry(identifier=entry.identifier, data=current_graph)

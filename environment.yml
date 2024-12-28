@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - python=3.11
+  - python=3.12
   - pip
   - openjdk # this is needed for nextflow
   - pip:
@@ -16,8 +16,8 @@ dependencies:
     - polars
     - stardist
     - tensorflow-cpu
-    - black[jupyter]
-    - isort
+    - black[jupyter]==24.10.0
+    - isort==5.13.2
     - torch
     - torchvision
     - torchaudio
@@ -30,4 +30,4 @@ dependencies:
     - --find-links https://data.pyg.org/whl/torch-2.5.0+cu124.html
     - -e /home/klettl/Development/github/overlap-tracking
     - -e /home/klettl/Development/github/core-data-utils
-    - precommit
+    - pre-commit
