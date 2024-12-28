@@ -29,6 +29,7 @@ workflow {
     track_cells(label_cell_approximation.out.results, structure_abstraction.out.results)
 
     build_graphs(track_cells.out.results)
+    annotate_graph_theoretical_observables(build_graphs.out.results)
 }
 
 process load_and_filter {
@@ -197,5 +198,25 @@ process build_graphs {
         --infile=${abstract_structure_fpath} \
         --mum_per_px=${params.mum_per_px} \
         --outfile="graph_dataset.pickle"
+    """
+}
+
+process annotate_graph_theoretical_observables {
+    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
+
+    label "high_cpu"
+
+    input:
+    tuple path(graph_dataset_fpath), val(basename)
+
+    output:
+    tuple path("graph_dataset_annotated.pickle"), val(basename), emit: results
+
+    script:
+    """
+    python ${projectDir}/steps/graph_theory_annotations.py \
+        --infile=${graph_dataset_fpath} \
+        --outfile="graph_dataset_annotated.pickle" \
+        --cpus=${task.cpus}
     """
 }
