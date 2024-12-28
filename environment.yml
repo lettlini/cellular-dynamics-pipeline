@@ -30,4 +30,4 @@ dependencies:
     - --find-links https://data.pyg.org/whl/torch-2.5.0+cu124.html
     - -e /home/klettl/Development/github/overlap-tracking
     - -e /home/klettl/Development/github/core-data-utils
-
+    - precommit
