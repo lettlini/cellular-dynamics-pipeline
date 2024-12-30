@@ -195,7 +195,7 @@ if __name__ == "__main__":
     x = BuildGraphTransform(args.mum_per_px)(x)
     x = CalculateCellNucleusShapeTransformation()(x)
     x = CalculateOrderParameter("cell_major_axis_angle_rad", "cell")(x)
-    graph_nematic_ds = CalculateOrderParameter(
+    x = CalculateOrderParameter(
         "nucleus_major_axis_angle_rad", "nucleus"
     )(x)
 
