@@ -1,14 +1,11 @@
 name: cmot-pipeline
 channels:
   - conda-forge
-  - bioconda
 dependencies:
   - python=3.12
   - pip
-  - openjdk # this is needed for nextflow
   - pip:
     - networkx
-    - nextflow
     - opencv-python
     - tqdm
     - numpy<2
