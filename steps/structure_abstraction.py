@@ -5,8 +5,10 @@ from typing import Any
 import cv2
 import numpy as np
 from core_data_utils.datasets import BaseDataSet, BaseDataSetEntry
-from core_data_utils.transformations import (BaseDataSetTransformation,
-                                             BaseMultiDataSetTransformation)
+from core_data_utils.transformations import (
+    BaseDataSetTransformation,
+    BaseMultiDataSetTransformation,
+)
 
 
 class ObjectInformationTransform(BaseDataSetTransformation):

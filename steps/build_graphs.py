@@ -15,7 +15,9 @@ class BuildGraphTransform(BaseDataSetTransformation):
         self._mum_per_px = mum_px
         super().__init__()
 
-    def _transform_single_entry(self, entry: BaseDataSetEntry, dataset_properties: dict) -> BaseDataSetEntry:
+    def _transform_single_entry(
+        self, entry: BaseDataSetEntry, dataset_properties: dict
+    ) -> BaseDataSetEntry:
 
         properties = entry.data
 
@@ -75,7 +77,9 @@ class BuildGraphTransform(BaseDataSetTransformation):
 
 
 class CalculateCellNucleusShapeTransformation(BaseDataSetTransformation):
-    def _transform_single_entry(self, entry: BaseDataSetEntry, dataset_properties: dict) -> BaseDataSetEntry:
+    def _transform_single_entry(
+        self, entry: BaseDataSetEntry, dataset_properties: dict
+    ) -> BaseDataSetEntry:
         graph = entry.data
 
         for _, nodeprops in graph.nodes(data=True):
@@ -132,7 +136,9 @@ class CalculateOrderParameter(BaseDataSetTransformation):
 
         return S, Q_tensor
 
-    def _transform_single_entry(self, entry: BaseDataSetEntry, dataset_properties: dict) -> BaseDataSetEntry:
+    def _transform_single_entry(
+        self, entry: BaseDataSetEntry, dataset_properties: dict
+    ) -> BaseDataSetEntry:
 
         current_graph = entry.data
 
@@ -195,8 +201,6 @@ if __name__ == "__main__":
     x = BuildGraphTransform(args.mum_per_px)(x)
     x = CalculateCellNucleusShapeTransformation()(x)
     x = CalculateOrderParameter("cell_major_axis_angle_rad", "cell")(x)
-    x = CalculateOrderParameter(
-        "nucleus_major_axis_angle_rad", "nucleus"
-    )(x)
+    x = CalculateOrderParameter("nucleus_major_axis_angle_rad", "nucleus")(x)
 
     x.to_pickle(args.outfile)
