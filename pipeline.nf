@@ -30,6 +30,7 @@ workflow {
 
     build_graphs(track_cells.out.results)
     annotate_graph_theoretical_observables(build_graphs.out.results)
+    annotate_neighbor_retention(annotate_graph_theoretical_observables.out.results)
 }
 
 process load_and_filter {
@@ -217,6 +218,27 @@ process annotate_graph_theoretical_observables {
     python ${projectDir}/steps/graph_theory_annotations.py \
         --infile=${graph_dataset_fpath} \
         --outfile="graph_dataset_annotated.pickle" \
+        --cpus=${task.cpus}
+    """
+}
+process annotate_neighbor_retention {
+    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
+
+    label "low_cpu"
+
+    input:
+    tuple path(graph_dataset_fpath), val(basename)
+
+    output:
+    tuple path("neighbor_retention_graph_ds.pickle"), val(basename)
+
+    script:
+    """
+    python ${projectDir}/steps/annotate_neighbor_retention.py \
+        --infile=${graph_dataset_fpath} \
+        --outfile="neighbor_retention_graph_ds.pickle" \
+        --delta_t_minutes=${params.delta_t_minutes} \
+        --lag_times_minutes=${params.lag_times_minutes} \
         --cpus=${task.cpus}
     """
 }
