@@ -32,9 +32,15 @@ class OverlapTrackingTransformation:
                 assert "next_object_id" not in current_props[current_label]
                 current_props[current_label]["next_object_id"] = next_label
 
-            new_data_dict[centry.identifier] = BaseDataSetEntry(identifier=centry.identifier, data=current_props, metadata=centry.metadata)
+            new_data_dict[centry.identifier] = BaseDataSetEntry(
+                identifier=centry.identifier,
+                data=current_props,
+                metadata=centry.metadata,
+            )
 
-        return BaseDataSet(ds_metadata=cell_label_ds.metadata, dataset_entries=new_data_dict)
+        return BaseDataSet(
+            ds_metadata=cell_label_ds.metadata, dataset_entries=new_data_dict
+        )
 
 
 if __name__ == "__main__":
