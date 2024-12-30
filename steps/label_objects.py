@@ -7,7 +7,9 @@ from core_data_utils.transformations import BaseDataSetTransformation
 
 
 class LabelImagesTransformation(BaseDataSetTransformation):
-    def _transform_single_entry(self, entry: BaseDataSetEntry) -> BaseDataSetEntry:
+    def _transform_single_entry(
+        self, entry: BaseDataSetEntry, dataset_properties: dict
+    ) -> BaseDataSetEntry:
         image = entry.data
 
         image = (image > 0).astype(np.uint8)

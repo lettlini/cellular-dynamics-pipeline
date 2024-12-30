@@ -19,7 +19,9 @@ class ObjectInformationTransform(BaseDataSetTransformation):
 
         super().__init__()
 
-    def _transform_single_entry(self, entry: BaseDataSetEntry) -> tuple[str, dict]:
+    def _transform_single_entry(
+        self, entry: BaseDataSetEntry, dataset_properties: dict
+    ) -> tuple[str, dict]:
 
         image = entry.data  # image is already labelled
         binary_image = (image > 0).astype(np.uint8)
@@ -71,7 +73,9 @@ class ObjectInformationTransform(BaseDataSetTransformation):
 
 
 class MergeCellNucleiInformation(BaseMultiDataSetTransformation):
-    def _transform_single_entry(self, entry: BaseDataSetEntry) -> BaseDataSetEntry:
+    def _transform_single_entry(
+        self, entry: BaseDataSetEntry, dataset_properties: dict
+    ) -> BaseDataSetEntry:
 
         nuc_labelim = entry.data["nuclei_labels"]
         cell_labelim = entry.data["cell_labels"]
@@ -125,7 +129,9 @@ class IdentifyNeighborsTransformation(BaseMultiDataSetTransformation):
 
         super().__init__()
 
-    def _transform_single_entry(self, entry: BaseDataSetEntry) -> BaseDataSetEntry:
+    def _transform_single_entry(
+        self, entry: BaseDataSetEntry, dataset_properties: dict
+    ) -> BaseDataSetEntry:
         props = entry.data["merged_properties"]
         labelim = entry.data["cell_labels"]
 

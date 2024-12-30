@@ -44,7 +44,9 @@ class StarDistSegmentationTransform(BaseDataSetTransformation):
 
         super().__init__()
 
-    def _transform_single_entry(self, entry: BaseDataSetEntry) -> BaseDataSetEntry:
+    def _transform_single_entry(
+        self, entry: BaseDataSetEntry, dataset_properties: dict
+    ) -> BaseDataSetEntry:
 
         image = entry.data
 
@@ -64,9 +66,6 @@ class StarDistSegmentationTransform(BaseDataSetTransformation):
 
         return BaseDataSetEntry(identifier=entry.identifier, data=labels)
 
-    def _post_processing(self, data_dict: dict):
-        return ImageDataset(data_dict)
-
 
 class RemoveSmallObjectsTransform(BaseDataSetTransformation):
     def __init__(
@@ -77,7 +76,9 @@ class RemoveSmallObjectsTransform(BaseDataSetTransformation):
 
         super().__init__()
 
-    def _transform_single_entry(self, entry: BaseDataSetEntry) -> BaseDataSetEntry:
+    def _transform_single_entry(
+        self, entry: BaseDataSetEntry, dataset_properties: dict
+    ) -> BaseDataSetEntry:
 
         image = entry.data
 

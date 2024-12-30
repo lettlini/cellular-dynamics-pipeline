@@ -8,7 +8,9 @@ from core_data_utils.transformations import BaseDataSetTransformation
 
 class GraphTheoreticalAnnotationsTransform(BaseDataSetTransformation):
 
-    def _transform_single_entry(self, entry: BaseDataSetEntry) -> BaseDataSetEntry:
+    def _transform_single_entry(
+        self, entry: BaseDataSetEntry, dataset_properties: dict
+    ) -> BaseDataSetEntry:
         cgraph = entry.data
 
         # Find all methods that start with 'attribute_node'

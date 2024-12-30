@@ -9,7 +9,9 @@ from core_data_utils.transformations import BaseDataSetTransformation
 
 
 class MinMaxScaleTransform(BaseDataSetTransformation):
-    def _transform_single_entry(self, entry: BaseDataSetEntry) -> BaseDataSetEntry:
+    def _transform_single_entry(
+        self, entry: BaseDataSetEntry, dataset_properties: dict
+    ) -> BaseDataSetEntry:
 
         new_image = entry.data
 
@@ -18,20 +20,16 @@ class MinMaxScaleTransform(BaseDataSetTransformation):
 
         return BaseDataSetEntry(identifier=entry.identifier, data=new_image)
 
-    def _post_processing(self, data_dict: dict[str, Any]) -> Any:
-        return ImageDataset(data_dict)
-
 
 class GrayScaleTransform(BaseDataSetTransformation):
-    def _transform_single_entry(self, entry: BaseDataSetEntry) -> BaseDataSetEntry:
+    def _transform_single_entry(
+        self, entry: BaseDataSetEntry, dataset_properties: dict
+    ) -> BaseDataSetEntry:
 
         image = entry.data
 
         new_image = image.mean(axis=2)
         return BaseDataSetEntry(identifier=entry.identifier, data=new_image)
-
-    def _post_processing(self, data_dict: dict[str, Any]) -> Any:
-        return ImageDataset(data_dict)
 
 
 if __name__ == "__main__":

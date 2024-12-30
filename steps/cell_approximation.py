@@ -15,7 +15,9 @@ class CellApproximationTransform(BaseDataSetTransformation):
 
         super().__init__()
 
-    def _transform_single_entry(self, entry: BaseDataSetEntry) -> BaseDataSetEntry:
+    def _transform_single_entry(
+        self, entry: BaseDataSetEntry, dataset_properties: dict
+    ) -> BaseDataSetEntry:
         """Function to convert nuclei brightfield microscopy images (grayscale) to cell masks"""
 
         image = entry.data
@@ -70,9 +72,6 @@ class CellApproximationTransform(BaseDataSetTransformation):
         ret_image[set_zero_mask] = 0
 
         return ret_image
-
-    def _post_processing(self, data_dict: dict):
-        return ImageDataset(data_dict)
 
 
 if __name__ == "__main__":
