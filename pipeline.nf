@@ -31,6 +31,7 @@ workflow {
     build_graphs(track_cells.out.results)
     annotate_graph_theoretical_observables(build_graphs.out.results)
     annotate_neighbor_retention(annotate_graph_theoretical_observables.out.results)
+    annotate_D2min(annotate_neighbor_retention.out.results)
 }
 
 process load_and_filter {
@@ -230,7 +231,7 @@ process annotate_neighbor_retention {
     tuple path(graph_dataset_fpath), val(basename)
 
     output:
-    tuple path("neighbor_retention_graph_ds.pickle"), val(basename)
+    tuple path("neighbor_retention_graph_ds.pickle"), val(basename), emit: results
 
     script:
     """
@@ -239,6 +240,29 @@ process annotate_neighbor_retention {
         --outfile="neighbor_retention_graph_ds.pickle" \
         --delta_t_minutes=${params.delta_t_minutes} \
         --lag_times_minutes=${params.lag_times_minutes} \
+        --cpus=${task.cpus}
+    """
+}
+
+process annotate_D2min {
+    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
+
+    label "low_cpu"
+
+    input:
+    tuple path(graph_dataset_fpath), val(basename)
+
+    output:
+    tuple path("D2min_annotated_graphs.pickle"), val(basename)
+
+    script:
+    """
+    python ${projectDir}/steps/annotate_D2min.py \
+        --infile=${graph_dataset_fpath} \
+        --outfile="D2min_annotated_graphs.pickle" \
+        --delta_t_minutes=${params.delta_t_minutes} \
+        --lag_times_minutes=${params.lag_times_minutes} \
+        --mum_per_px=${params.mum_per_px} \
         --cpus=${task.cpus}
     """
 }
