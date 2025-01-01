@@ -2,39 +2,16 @@ from argparse import ArgumentParser
 from copy import deepcopy
 from typing import Any, Optional
 
-import networkx as nx
 import numpy as np
-from core_data_utils.datasets import BaseDataSet, BaseDataSetEntry
+from core_data_utils.datasets import BaseDataSet
 from tqdm import trange
+from utils import get_future_label, get_neighbor_list
 
 
 class NeighborRetentionTransformation:
 
     def __init__(self, lag_time_frames: int) -> None:
         self._lag_time_frames = lag_time_frames
-
-    @staticmethod
-    def get_neighbor_list(G: nx.Graph, node: int) -> list[int]:
-        return list(G.neighbors(node))
-
-    @staticmethod
-    def get_future_label(
-        graph_ds: BaseDataSet, node_label: int, lag_time_frames: int, sindex: int
-    ) -> int | None:
-
-        if sindex + lag_time_frames + 1 >= len(graph_ds):
-            raise ValueError(f"Not enough data.")
-        if lag_time_frames == 0:
-            return node_label
-
-        current_label = node_label
-        for i in range(lag_time_frames):
-            nprops = graph_ds[sindex + i].data.nodes[current_label]
-            if "next_object_id" not in nprops:
-                return None
-            current_label = nprops["next_object_id"]
-
-        return current_label
 
     @staticmethod
     def get_neighbor_retention_fraction(
@@ -46,7 +23,7 @@ class NeighborRetentionTransformation:
         if lag_time_frames == 0:
             return 1.0
 
-        future_own_label = NeighborRetentionTransformation.get_future_label(
+        future_own_label = get_future_label(
             graph_ds=graph_ds,
             sindex=sindex,
             node_label=node_label,
@@ -56,9 +33,7 @@ class NeighborRetentionTransformation:
         if future_own_label is None:
             return np.NaN
 
-        current_neighbors = NeighborRetentionTransformation.get_neighbor_list(
-            graph_ds[sindex].data, node_label
-        )
+        current_neighbors = get_neighbor_list(graph_ds[sindex].data, node_label)
         if len(current_neighbors) == 0:
             return np.NaN
 
@@ -66,7 +41,7 @@ class NeighborRetentionTransformation:
         future_current_neighbors = []
 
         for nb in current_neighbors:
-            flabel = NeighborRetentionTransformation.get_future_label(
+            flabel = get_future_label(
                 graph_ds=graph_ds,
                 sindex=sindex,
                 node_label=nb,
@@ -75,7 +50,7 @@ class NeighborRetentionTransformation:
             if flabel is not None:
                 future_current_neighbors.append(flabel)
 
-        true_future_neighbors = NeighborRetentionTransformation.get_neighbor_list(
+        true_future_neighbors = get_neighbor_list(
             graph_ds[sindex + lag_time_frames].data, future_own_label
         )
         retained_neighbors = 0
