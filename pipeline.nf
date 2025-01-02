@@ -263,6 +263,7 @@ process annotate_D2min {
         --delta_t_minutes=${params.delta_t_minutes} \
         --lag_times_minutes=${params.lag_times_minutes} \
         --mum_per_px=${params.mum_per_px} \
+        --minimum_neighbors=${params.minimum_neighbors} \
         --cpus=${task.cpus}
     """
 }
