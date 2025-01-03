@@ -1,15 +1,20 @@
 #!/bin/bash
-#SBATCH --partition sirius-long
-#SBATCH --mem 5G
-#SBATCH -c 1
-#SBATCH --time=2-00:00:00
-#SBATCH --ntasks=1
+#SBATCH --job-name=nextflow_pipeline   # Job name
+#SBATCH --output=nextflow_%j.out       # Standard output log (%j will be replaced with the job ID)
+#SBATCH --error=nextflow_%j.err        # Standard error log (%j will be replaced with the job ID)
+#SBATCH --ntasks=1                     # Number of tasks (we're running a single task, Nextflow will handle the rest)
+#SBATCH --cpus-per-task=2             # Number of CPU cores per task
+#SBATCH --mem=5G                     # Memory allocation per task (adjust as needed)
+#SBATCH --time=2:00:00               # Maximum run time (in HH:MM:SS)
+#SBATCH --partition=polaris-long           # Partition to submit to (adjust if needed)
 
-WORKFLOW=$1
-CONFIG=$2
+# Load Nextflow module (if it's available as a module)
+module load Nextflow
 
-# Use a conda environment where you have installed Nextflow
-# (may not be needed if you have installed it in a different way)
-conda activate nextflow
-
-nextflow -C ${CONFIG} run ${WORKFLOW}
+nextflow run ~/cellular-dynamics-pipeline/pipeline.nf \
+    -c ~/cellular-dynamics-pipeline/pipeline.nf/dataset_configs/test.config \
+    -profile cluster \
+    -with-report \
+    -with-dag flowchart.png \
+    -with-trace \
+    -with-timeline
