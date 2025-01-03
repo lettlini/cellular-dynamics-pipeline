@@ -25,6 +25,6 @@ dependencies:
     - torch-geometric
     - --extra-index-url https://download.pytorch.org/whl/cu124
     - --find-links https://data.pyg.org/whl/torch-2.5.0+cu124.html
-    - -e /home/klettl/Development/github/overlap-tracking
-    - -e /home/klettl/Development/github/core-data-utils
+    - git+https://github.com/lettlini/overlap-tracking
+    - git+https://github.com/lettlini/core-data-utils
     - pre-commit
