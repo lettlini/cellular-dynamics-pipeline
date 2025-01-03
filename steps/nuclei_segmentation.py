@@ -1,5 +1,4 @@
 import os
-import pickle
 from argparse import ArgumentParser
 
 import cv2
@@ -34,13 +33,37 @@ def get_disconnected(timage: np.array) -> np.array:
     return ~(dmask.astype(bool))
 
 
+class MinMaxScaleTransform(BaseDataSetTransformation):
+    def _transform_single_entry(
+        self, entry: BaseDataSetEntry, dataset_properties: dict
+    ) -> BaseDataSetEntry:
+
+        new_image = entry.data
+
+        minval, maxval = np.min(new_image), np.max(new_image)
+        new_image = (new_image - minval) / (maxval - minval)
+
+        return BaseDataSetEntry(identifier=entry.identifier, data=new_image)
+
+
+class GrayScaleTransform(BaseDataSetTransformation):
+    def _transform_single_entry(
+        self, entry: BaseDataSetEntry, dataset_properties: dict
+    ) -> BaseDataSetEntry:
+
+        image = entry.data
+
+        new_image = image.mean(axis=2)
+        return BaseDataSetEntry(identifier=entry.identifier, data=new_image)
+
+
 class StarDistSegmentationTransform(BaseDataSetTransformation):
     def __init__(
         self,
         prob_threshold: float | None = None,
     ):
-        self.probability_threshold: float = prob_threshold
-        self.stardist_model = StarDist2D.from_pretrained("2D_versatile_fluo")
+        self._probability_threshold: float = prob_threshold
+        self._stardist_model = StarDist2D.from_pretrained("2D_versatile_fluo")
 
         super().__init__()
 
@@ -50,16 +73,13 @@ class StarDistSegmentationTransform(BaseDataSetTransformation):
 
         image = entry.data
 
-        labels, info = self.stardist_model.predict_instances(image)
+        labels, _ = self._stardist_model.predict_instances(
+            image, prob_thresh=self._probability_threshold
+        )
 
         # We need to disconnect touching labels:
         dmask = get_disconnected(labels)
         labels[dmask == 1] = 0
-
-        if self.probability_threshold is not None:
-            for j in range(len(info["prob"])):
-                if info["prob"][j] < self.probability_threshold:
-                    labels[labels == j + 1] = 0
 
         # convert label image to binary mask
         labels = (labels > 0).astype(np.int8)
@@ -120,6 +140,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     x = BaseDataSet.from_pickle(args.infile)
+
+    x = GrayScaleTransform()(x)
+    x = MinMaxScaleTransform()(x)
 
     x = StarDistSegmentationTransform(prob_threshold=args.stardist_probility_threshold)(
         dataset=x

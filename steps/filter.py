@@ -1,7 +1,6 @@
 from argparse import ArgumentParser
 
 from core_data_utils.datasets import BaseDataSet, BaseDataSetEntry
-from core_data_utils.datasets.image import ImageDataset
 from core_data_utils.transformations import BaseFilter
 
 
@@ -48,7 +47,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    x: ImageDataset = ImageDataset.from_directory(args.infile)
+    x = BaseDataSet.from_pickle(args.infile)
     x = FirstLastFilter(first_n=args.drop_first_n, last_m=args.drop_last_m)(x)
 
     x.to_pickle(args.outfile)

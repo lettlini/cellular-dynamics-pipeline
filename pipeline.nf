@@ -12,12 +12,9 @@ workflow {
     }
 
     // input_datasets.view { "Input file: ${it}" }
-
-    load_and_filter(input_datasets)
-    preprocess(
-        load_and_filter.out.results
-    )
-    nuclei_segmentation(preprocess.out.results).collect(flat: false)
+    prepare_dataset_from_raw(input_datasets)
+    confluency_filtering(prepare_dataset_from_raw.out.results)
+    nuclei_segmentation(confluency_filtering.out.results)
     cell_approximation(nuclei_segmentation.out.results)
 
 
@@ -34,7 +31,7 @@ workflow {
     annotate_D2min(annotate_neighbor_retention.out.results)
 }
 
-process load_and_filter {
+process prepare_dataset_from_raw {
 
     publishDir "${params.out_pdir}/${basename}", mode: 'copy'
 
@@ -42,33 +39,34 @@ process load_and_filter {
     tuple path(dataset_path), val(basename)
 
     output:
-    tuple path("original_filtered.pickle"), val(basename), emit: results
+    tuple path("original_dataset.pickle"), val(basename), emit: results
+
+    script:
+    """
+    python ${projectDir}/steps/prepare_dataset.py \
+        --indir="${dataset_path}" \
+        --outfile="original_dataset.pickle" \
+        --provider=${params.provider}
+    """
+}
+
+process confluency_filtering {
+
+    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
+
+    input:
+    tuple path(dataset_path), val(basename)
+
+    output:
+    tuple path("confluency_filtered.pickle"), val(basename), emit: results
 
     script:
     """
     python ${projectDir}/steps/filter.py \
         --infile="${dataset_path}" \
-        --outfile="original_filtered.pickle" \
+        --outfile="confluency_filtered.pickle" \
         --drop_first_n=${params.drop_first_n} \
         --drop_last_m=${params.drop_last_m}
-    """
-}
-
-process preprocess {
-
-    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
-
-    input:
-    tuple path(fpath), val(basename)
-
-    output:
-    tuple path("preprocessed.pickle"), val(basename), emit: results
-
-    script:
-    """
-    python ${projectDir}/steps/preprocessing.py \
-        --infile="${fpath}" \
-        --outfile="preprocessed.pickle" \
     """
 }
 
