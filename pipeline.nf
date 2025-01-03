@@ -4,7 +4,7 @@ params.parent_dir_in = file(params.parent_indir).resolve(params.in_dir).toString
 params.parent_dir_out = file(params.parent_outdir).resolve(params.out_dir).toString()
 
 workflow {
-    input_datasets = Channel.fromPath("${params.in_pdir}", type: "dir")
+    input_datasets = Channel.fromPath("${params.parent_dir_in}", type: "dir")
 
     // Transform the channel to emit both the directory and its basename
     // This creates a tuple channel: [dir, basename]
@@ -35,7 +35,7 @@ workflow {
 
 process prepare_dataset_from_raw {
 
-    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
+    publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
     input:
     tuple path(dataset_path), val(basename)
@@ -55,7 +55,7 @@ process prepare_dataset_from_raw {
 
 process confluency_filtering {
 
-    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
+    publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
     input:
     tuple path(dataset_path), val(basename)
@@ -76,7 +76,7 @@ process confluency_filtering {
 
 process nuclei_segmentation {
     maxForks 1
-    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
+    publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
     input:
     tuple path(fpath), val(basename)
@@ -98,7 +98,7 @@ process nuclei_segmentation {
 process cell_approximation {
     maxForks 2
 
-    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
+    publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
     input:
     tuple path(fpath), val(basename)
@@ -117,7 +117,7 @@ process cell_approximation {
 }
 
 process structure_abstraction {
-    publishDir "${params.out_pdir}/${cell_basename}", mode: 'copy'
+    publishDir "${params.parent_dir_out}/${cell_basename}", mode: 'copy'
 
     input:
     tuple path(nuclei_fpath), val(nuclei_basename)
@@ -138,7 +138,7 @@ process structure_abstraction {
 }
 
 process label_cell_approximation {
-    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
+    publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
     input:
     tuple path(fpath), val(basename)
@@ -156,7 +156,7 @@ process label_cell_approximation {
 }
 
 process label_nuclei_segmentation {
-    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
+    publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
     input:
     tuple path(fpath), val(basename)
@@ -174,7 +174,7 @@ process label_nuclei_segmentation {
 }
 
 process track_cells {
-    publishDir "${params.out_pdir}/${cell_basename}", mode: 'copy'
+    publishDir "${params.parent_dir_out}/${cell_basename}", mode: 'copy'
 
     input:
     tuple path(cell_approximation_fpath), val(cell_basename)
@@ -194,7 +194,7 @@ process track_cells {
 }
 
 process build_graphs {
-    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
+    publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
     input:
     tuple path(abstract_structure_fpath), val(basename)
@@ -213,7 +213,7 @@ process build_graphs {
 }
 
 process annotate_graph_theoretical_observables {
-    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
+    publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
     label "high_cpu"
 
@@ -232,7 +232,7 @@ process annotate_graph_theoretical_observables {
     """
 }
 process annotate_neighbor_retention {
-    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
+    publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
     input:
     tuple path(graph_dataset_fpath), val(basename)
@@ -252,7 +252,7 @@ process annotate_neighbor_retention {
 }
 
 process annotate_D2min {
-    publishDir "${params.out_pdir}/${basename}", mode: 'copy'
+    publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
     input:
     tuple path(graph_dataset_fpath), val(basename)
