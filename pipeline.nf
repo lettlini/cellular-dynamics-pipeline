@@ -1,5 +1,7 @@
 params.min_nucleus_area_pxsq = params.min_nucleus_area_mumsq / (params.mum_per_px ** 2)
 params.cell_cutoff_px = params.cell_cutoff_mum / params.mum_per_px
+params.parent_dir_in = file(params.parent_indir).resolve(params.in_dir).toString()
+params.parent_dir_out = file(params.parent_outdir).resolve(params.out_dir).toString()
 
 workflow {
     input_datasets = Channel.fromPath("${params.in_pdir}", type: "dir")
