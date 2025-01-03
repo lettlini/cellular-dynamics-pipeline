@@ -48,7 +48,8 @@ process prepare_dataset_from_raw {
     python ${projectDir}/steps/prepare_dataset.py \
         --indir="${dataset_path}" \
         --outfile="original_dataset.pickle" \
-        --provider=${params.provider}
+        --provider=${params.provider} \
+        --cpus=${task.cpus}
     """
 }
 
@@ -68,7 +69,8 @@ process confluency_filtering {
         --infile="${dataset_path}" \
         --outfile="confluency_filtered.pickle" \
         --drop_first_n=${params.drop_first_n} \
-        --drop_last_m=${params.drop_last_m}
+        --drop_last_m=${params.drop_last_m} \
+        --cpus=${task.cpus}
     """
 }
 
@@ -88,7 +90,8 @@ process nuclei_segmentation {
         --infile="${fpath}" \
         --outfile="nuclei_segmentation.pickle" \
         --stardist_probility_threshold=${params.stardist_probality_threshold} \
-        --min_nucleus_area_pxsq=${params.min_nucleus_area_pxsq}
+        --min_nucleus_area_pxsq=${params.min_nucleus_area_pxsq} \
+        --cpus=${task.cpus}
     """
 }
 
@@ -108,7 +111,8 @@ process cell_approximation {
     python ${projectDir}/steps/cell_approximation.py \
         --infile="${fpath}" \
         --outfile="cell_approximation.pickle" \
-        --cell_cutoff_px=${params.cell_cutoff_px}
+        --cell_cutoff_px=${params.cell_cutoff_px} \
+        --cpus=${task.cpus}
     """
 }
 
@@ -128,7 +132,8 @@ process structure_abstraction {
         --nuclei_infile="${nuclei_fpath}" \
         --cells_infile="${cell_fpath}" \
         --mum_per_px=${params.mum_per_px} \
-        --outfile="abstract_structure.pickle"
+        --outfile="abstract_structure.pickle" \
+        --cpus=${task.cpus}
     """
 }
 
@@ -145,7 +150,8 @@ process label_cell_approximation {
     """
     python ${projectDir}/steps/label_objects.py \
         --infile=${fpath} \
-        --outfile="cells_labelled.pickle"
+        --outfile="cells_labelled.pickle" \
+        --cpus=${task.cpus}
     """
 }
 
@@ -162,7 +168,8 @@ process label_nuclei_segmentation {
     """
     python ${projectDir}/steps/label_objects.py \
         --infile=${fpath} \
-        --outfile="nuclei_labelled.pickle"
+        --outfile="nuclei_labelled.pickle" \
+        --cpus=${task.cpus}
     """
 }
 
@@ -181,7 +188,8 @@ process track_cells {
     python ${projectDir}/steps/track_cells.py \
         --cell_label_file=${cell_approximation_fpath} \
         --abstract_structure_file=${abstract_structure_fpath} \
-        --outfile="tracked_abstract_structure.pickle"
+        --outfile="tracked_abstract_structure.pickle" \
+        --cpus=${task.cpus}
     """
 }
 
@@ -199,7 +207,8 @@ process build_graphs {
     python ${projectDir}/steps/build_graphs.py \
         --infile=${abstract_structure_fpath} \
         --mum_per_px=${params.mum_per_px} \
-        --outfile="graph_dataset.pickle"
+        --outfile="graph_dataset.pickle" \
+        --cpus=${task.cpus}
     """
 }
 
@@ -219,13 +228,11 @@ process annotate_graph_theoretical_observables {
     python ${projectDir}/steps/graph_theory_annotations.py \
         --infile=${graph_dataset_fpath} \
         --outfile="graph_dataset_annotated.pickle" \
-        --cpus=${task.cpus}
+        --cpus=${task.cpus} \
     """
 }
 process annotate_neighbor_retention {
     publishDir "${params.out_pdir}/${basename}", mode: 'copy'
-
-    label "low_cpu"
 
     input:
     tuple path(graph_dataset_fpath), val(basename)
@@ -247,8 +254,6 @@ process annotate_neighbor_retention {
 process annotate_D2min {
     publishDir "${params.out_pdir}/${basename}", mode: 'copy'
 
-    label "low_cpu"
-
     input:
     tuple path(graph_dataset_fpath), val(basename)
 
@@ -264,6 +269,6 @@ process annotate_D2min {
         --lag_times_minutes=${params.lag_times_minutes} \
         --mum_per_px=${params.mum_per_px} \
         --minimum_neighbors=${params.minimum_neighbors} \
-        --cpus=${task.cpus}
+        --cpus=${task.cpus} \
     """
 }

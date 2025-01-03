@@ -34,8 +34,16 @@ if __name__ == "__main__":
     parser.add_argument("--indir", type=str, required=True)
     parser.add_argument("--outfile", type=str, required=True)
     parser.add_argument("--provider", type=str, required=True)
+    parser.add_argument(
+        "--cpus",
+        required=True,
+        type=int,
+        help="CPU cores to use.",
+    )
 
     args = parser.parse_args()
+
+    cv2.setNumThreads(args.cpus)
 
     if args.provider.lower() == "eliane":
         x = load_dir_eliane(args.indir)

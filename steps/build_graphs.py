@@ -1,6 +1,5 @@
 from argparse import ArgumentParser
 
-import cv2
 import networkx as nx
 import numpy as np
 from core_data_utils.datasets import BaseDataSet, BaseDataSetEntry
@@ -193,6 +192,12 @@ if __name__ == "__main__":
         required=True,
         type=str,
         help="Path to output file.",
+    )
+    parser.add_argument(
+        "--cpus",
+        required=True,
+        type=int,
+        help="CPU cores to use.",
     )
 
     args = parser.parse_args()

@@ -44,6 +44,12 @@ if __name__ == "__main__":
         type=int,
         help="Drop last m entries from DataSet",
     )
+    parser.add_argument(
+        "--cpus",
+        required=True,
+        type=int,
+        help="CPU cores to use.",
+    )
 
     args = parser.parse_args()
 

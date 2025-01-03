@@ -61,6 +61,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--outfile", required=True, type=str, help="Path to output file."
     )
+    parser.add_argument(
+        "--cpus",
+        required=True,
+        type=int,
+        help="CPU cores to use.",
+    )
 
     args = parser.parse_args()
 

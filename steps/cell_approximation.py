@@ -88,8 +88,16 @@ if __name__ == "__main__":
         type=float,
         help="Maximum radius of individual cells",
     )
+    parser.add_argument(
+        "--cpus",
+        required=True,
+        type=int,
+        help="CPU cores to use.",
+    )
 
     args = parser.parse_args()
+
+    cv2.setNumThreads(args.cpus)
 
     x = BaseDataSet.from_pickle(args.infile)
 
