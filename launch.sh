@@ -15,8 +15,4 @@ module load Mamba
 
 nextflow run ~/cellular-dynamics-pipeline/pipeline.nf \
     -c ~/cellular-dynamics-pipeline/dataset_configs/test.config \
-    -profile cluster \
-    -with-report \
-    -with-dag flowchart.png \
-    -with-trace \
-    -with-timeline
+    -profile cluster
