@@ -12,7 +12,7 @@
 module load Nextflow
 
 nextflow run ~/cellular-dynamics-pipeline/pipeline.nf \
-    -c ~/cellular-dynamics-pipeline/pipeline.nf/dataset_configs/test.config \
+    -c ~/cellular-dynamics-pipeline/dataset_configs/test.config \
     -profile cluster \
     -with-report \
     -with-dag flowchart.png \
