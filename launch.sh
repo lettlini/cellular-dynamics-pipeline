@@ -10,6 +10,8 @@
 
 # Load Nextflow module (if it's available as a module)
 module load Nextflow
+module load Graphviz
+module load Mamba
 
 nextflow run ~/cellular-dynamics-pipeline/pipeline.nf \
     -c ~/cellular-dynamics-pipeline/dataset_configs/test.config \
