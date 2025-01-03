@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=nextflow_pipeline   # Job name
-#SBATCH --output=nextflow_%j.out       # Standard output log (%j will be replaced with the job ID)
-#SBATCH --error=nextflow_%j.err        # Standard error log (%j will be replaced with the job ID)
+#SBATCH --output=/work/kl63sahy-monolayer/nextflow-logs/nextflow_%j.out       # Standard output log (%j will be replaced with the job ID)
+#SBATCH --error=/work/kl63sahy-monolayer/nextflow-logs/nextflow_%j.err        # Standard error log (%j will be replaced with the job ID)
 #SBATCH --ntasks=1                     # Number of tasks (we're running a single task, Nextflow will handle the rest)
 #SBATCH --cpus-per-task=2             # Number of CPU cores per task
 #SBATCH --mem=5G                     # Memory allocation per task (adjust as needed)
