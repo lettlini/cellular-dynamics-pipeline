@@ -1,10 +1,8 @@
-import pickle
 from argparse import ArgumentParser
 
 import cv2
 import numpy as np
 from core_data_utils.datasets import BaseDataSet, BaseDataSetEntry
-from core_data_utils.datasets.image import ImageDataset
 from core_data_utils.transformations import BaseDataSetTransformation
 from nuclei_segmentation import get_disconnected
 
