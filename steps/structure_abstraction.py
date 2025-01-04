@@ -113,7 +113,6 @@ class MergeCellNucleiInformation(BaseMultiDataSetTransformation):
         self, nuc_label_ds, cell_label_ds, nuc_prop_ds, cell_prop_ds
     ) -> BaseDataSet:
         return super()._transform(
-            self,
             nuclei_labels=nuc_label_ds,
             cell_labels=cell_label_ds,
             nuclei_properties=nuc_prop_ds,
@@ -192,10 +191,9 @@ class IdentifyNeighborsTransformation(BaseMultiDataSetTransformation):
         return BaseDataSetEntry(identifier=entry.identifier, data=props)
 
     def __call__(
-        self, merged_properties, cell_labels, parallel: bool = False, cpus: int = 10
+        self, merged_properties, cell_labels, parallel: bool = False, cpus: int = 1
     ) -> Any:
         return super()._transform(
-            parallel=parallel,
             cpus=cpus,
             merged_properties=merged_properties,
             cell_labels=cell_labels,
