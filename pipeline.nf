@@ -37,7 +37,7 @@ process prepare_dataset_from_raw {
 
     publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
-    label "low_cpu"
+    label "low_cpu", "short_running"
 
     input:
     tuple path(dataset_path), val(basename)
@@ -59,7 +59,7 @@ process confluency_filtering {
 
     publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
-    label "low_cpu"
+    label "low_cpu", "short_running"
 
     input:
     tuple path(dataset_path), val(basename)
@@ -144,6 +144,8 @@ process structure_abstraction {
 process label_cell_approximation {
     publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
+    label "short_running"
+
     input:
     tuple path(fpath), val(basename)
 
@@ -161,6 +163,8 @@ process label_cell_approximation {
 
 process label_nuclei_segmentation {
     publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
+
+    label "short_running"
 
     input:
     tuple path(fpath), val(basename)
@@ -219,7 +223,7 @@ process build_graphs {
 process annotate_graph_theoretical_observables {
     publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
-    label "high_cpu"
+    label "high_cpu", "long_running"
 
     input:
     tuple path(graph_dataset_fpath), val(basename)
@@ -257,6 +261,8 @@ process annotate_neighbor_retention {
 
 process annotate_D2min {
     publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
+
+    label "long_running"
 
     input:
     tuple path(graph_dataset_fpath), val(basename)
