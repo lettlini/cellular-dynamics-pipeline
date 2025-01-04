@@ -37,6 +37,8 @@ process prepare_dataset_from_raw {
 
     publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
+    label "low_cpu"
+
     input:
     tuple path(dataset_path), val(basename)
 
@@ -57,6 +59,8 @@ process confluency_filtering {
 
     publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
+    label "low_cpu"
+
     input:
     tuple path(dataset_path), val(basename)
 
@@ -75,8 +79,9 @@ process confluency_filtering {
 }
 
 process nuclei_segmentation {
-    maxForks 1
     publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
+
+    label "high_cpu"
 
     input:
     tuple path(fpath), val(basename)
@@ -96,7 +101,6 @@ process nuclei_segmentation {
 }
 
 process cell_approximation {
-    maxForks 2
 
     publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 

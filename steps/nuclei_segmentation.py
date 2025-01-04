@@ -145,7 +145,19 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    # limit opencv threads to not oversubscribe
     cv2.setNumThreads(args.cpus)
+
+    # limit tensorflow threads to not oversubscribe
+    os.environ["TF_NUM_INTRAOP_THREADS"] = (
+        args.cpus
+    )  # Use all cores for intra-op parallelism
+    os.environ["TF_NUM_INTEROP_THREADS"] = (
+        args.cpus // 2
+    )  # Use half of the cores for inter-op parallelism
+    os.environ["OMP_NUM_THREADS"] = (
+        args.cpus
+    )  # Set OpenMP threads to the allocated cores
 
     x = BaseDataSet.from_pickle(args.infile)
 
