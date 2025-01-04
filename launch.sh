@@ -19,7 +19,7 @@ module load Graphviz
 CONFIG_ID=$1
 
 nextflow run ~/cellular-dynamics-pipeline/pipeline.nf \
-    -c ~/cellular-dynamics-pipeline/dataset_configs/{$CONFIG_ID}.config \
+    -c ~/cellular-dynamics-pipeline/dataset_configs/$CONFIG_ID.config \
     -profile cluster \
     -with-report ${OUTPUT_DIR}/report.html \
     -with-timeline ${OUTPUT_DIR}/timeline.html \
