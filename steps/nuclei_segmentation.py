@@ -149,13 +149,13 @@ if __name__ == "__main__":
     cv2.setNumThreads(args.cpus)
 
     # limit tensorflow threads to not oversubscribe
-    os.environ["TF_NUM_INTRAOP_THREADS"] = (
+    os.environ["TF_NUM_INTRAOP_THREADS"] = str(
         args.cpus
     )  # Use all cores for intra-op parallelism
-    os.environ["TF_NUM_INTEROP_THREADS"] = (
+    os.environ["TF_NUM_INTEROP_THREADS"] = str(
         args.cpus // 2
     )  # Use half of the cores for inter-op parallelism
-    os.environ["OMP_NUM_THREADS"] = (
+    os.environ["OMP_NUM_THREADS"] = str(
         args.cpus
     )  # Set OpenMP threads to the allocated cores
 
