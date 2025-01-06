@@ -47,7 +47,8 @@ process prepare_dataset_from_raw {
 
     script:
     """
-    echo "Processing ${basename}"
+    echo "Processing: ${basename}"
+    echo "Dataset Path: ${dataset_path}, Basename: ${basename}"
     python ${projectDir}/steps/prepare_dataset.py \
         --indir="${dataset_path}" \
         --outfile="original_dataset.pickle" \
@@ -70,7 +71,7 @@ process confluency_filtering {
 
     script:
     """
-    echo "Processing ${basename}"
+    echo "Dataset Path: ${dataset_path}, Basename: ${basename}"
     python ${projectDir}/steps/filter.py \
         --infile="${dataset_path}" \
         --outfile="confluency_filtered.pickle" \
@@ -94,7 +95,7 @@ process nuclei_segmentation {
 
     script:
     """
-    echo "Processing ${basename}"
+    echo "Dataset Path: ${fpath}, Basename: ${basename}"
     python ${projectDir}/steps/nuclei_segmentation.py \
         --infile="${fpath}" \
         --outfile="nuclei_segmentation.pickle" \
@@ -116,7 +117,7 @@ process cell_approximation {
 
     script:
     """
-    echo "Processing ${basename}"
+    echo "Dataset Path: ${fpath}, Basename: ${basename}"
     python ${projectDir}/steps/cell_approximation.py \
         --infile="${fpath}" \
         --outfile="cell_approximation.pickle" \
@@ -137,7 +138,9 @@ process structure_abstraction {
 
     script:
     """
-    echo "Processing ${cell_basename}"
+    echo "Cell File Path: ${cell_fpath}, Basename: ${cell_basename}"
+    echo "Nuclei File Path: ${nuclei_fpath}, Basename: ${nuclei_basename}"
+
     python ${projectDir}/steps/structure_abstraction.py \
         --nuclei_infile="${nuclei_fpath}" \
         --cells_infile="${cell_fpath}" \
@@ -160,7 +163,7 @@ process label_cell_approximation {
 
     script:
     """
-    echo "Processing ${basename}"
+    echo "Cell File Path: ${fpath}, Basename: ${basename}"
     python ${projectDir}/steps/label_objects.py \
         --infile=${fpath} \
         --outfile="cells_labelled.pickle" \
@@ -181,7 +184,7 @@ process label_nuclei_segmentation {
 
     script:
     """
-    echo "Processing ${basename}"
+    echo "Cell File Path: ${fpath}, Basename: ${basename}"
     python ${projectDir}/steps/label_objects.py \
         --infile=${fpath} \
         --outfile="nuclei_labelled.pickle" \
@@ -201,7 +204,8 @@ process track_cells {
 
     script:
     """
-    echo "Processing ${cell_basename}"
+    echo "Cell Approximation Path: ${cell_approximation_fpath}, Basename: ${cell_basename}"
+    echo "Abstract Structure Path: ${abstract_structure_fpath}, Basename: ${as_basename}"
     python ${projectDir}/steps/track_cells.py \
         --cell_label_file=${cell_approximation_fpath} \
         --abstract_structure_file=${abstract_structure_fpath} \
@@ -221,7 +225,7 @@ process build_graphs {
 
     script:
     """
-    echo "Processing ${basename}"
+    echo "Abstract Structure Path: ${abstract_structure_fpath}, Basename: ${basename}"
     python ${projectDir}/steps/build_graphs.py \
         --infile=${abstract_structure_fpath} \
         --mum_per_px=${params.mum_per_px} \
@@ -243,7 +247,7 @@ process annotate_graph_theoretical_observables {
 
     script:
     """
-    echo "Processing ${basename}"
+    echo "Graph Dataset File Path: ${graph_dataset_fpath}, Basename: ${basename}"
     python ${projectDir}/steps/graph_theory_annotations.py \
         --infile=${graph_dataset_fpath} \
         --outfile="graph_dataset_annotated.pickle" \
@@ -261,7 +265,7 @@ process annotate_neighbor_retention {
 
     script:
     """
-    echo "Processing ${basename}"
+    echo "Graph Dataset File Path: ${graph_dataset_fpath}, Basename: ${basename}"
     python ${projectDir}/steps/annotate_neighbor_retention.py \
         --infile=${graph_dataset_fpath} \
         --outfile="neighbor_retention_graph_ds.pickle" \
@@ -284,7 +288,7 @@ process annotate_D2min {
 
     script:
     """
-    echo "Processing ${basename}"
+    echo "Graph Dataset File Path: ${graph_dataset_fpath}, Basename: ${basename}"
     python ${projectDir}/steps/annotate_D2min.py \
         --infile=${graph_dataset_fpath} \
         --outfile="D2min_annotated_graphs.pickle" \
