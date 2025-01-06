@@ -242,7 +242,10 @@ if __name__ == "__main__":
     )
 
     all_properties_merged = MergeCellNucleiInformation()(
-        nuclei_labelled_ds, cells_labelled_ds, nuclei_properties, cell_properties
+        nuc_label_ds=nuclei_labelled_ds,
+        cell_label_ds=cells_labelled_ds,
+        nuc_prop_ds=nuclei_properties,
+        cell_prop_ds=cell_properties,
     )
 
     all_properties_merged_neighbors = IdentifyNeighborsTransformation(
