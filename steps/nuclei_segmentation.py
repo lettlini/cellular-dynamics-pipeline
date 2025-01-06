@@ -115,6 +115,7 @@ class RemoveSmallObjectsTransform(BaseDataSetTransformation):
 
 
 if __name__ == "__main__":
+    cv2.setNumThreads(0)
     parser = ArgumentParser()
     parser.add_argument(
         "--infile", required=True, type=str, help="Absolute path to input file"

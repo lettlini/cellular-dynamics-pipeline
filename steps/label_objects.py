@@ -43,8 +43,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    cv2.setNumThreads(args.cpus)
+    cv2.setNumThreads(0)
 
     x = BaseDataSet.from_pickle(args.infile)
-    x = LabelImagesTransformation()(x)
+    x = LabelImagesTransformation()(x, cpus=args.cpus)
     x.to_pickle(args.outfile)

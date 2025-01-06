@@ -73,6 +73,9 @@ class CellApproximationTransform(BaseDataSetTransformation):
 
 
 if __name__ == "__main__":
+
+    cv2.setNumThreads(0)
+
     parser = ArgumentParser()
     parser.add_argument(
         "--infile", required=True, type=str, help="Absolute path to input file"
@@ -94,8 +97,6 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-
-    cv2.setNumThreads(0)
 
     x = BaseDataSet.from_pickle(args.infile)
 

@@ -199,6 +199,9 @@ class IdentifyNeighborsTransformation(BaseMultiDataSetTransformation):
 
 
 if __name__ == "__main__":
+
+    cv2.setNumThreads(0)
+
     parser = ArgumentParser()
 
     parser.add_argument(
@@ -227,9 +230,6 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-
-    # disable multi-threading in opencv
-    cv2.setNumThreads(0)
 
     cells_labelled_ds = BaseDataSet.from_pickle(args.cells_infile)
     nuclei_labelled_ds = BaseDataSet.from_pickle(args.nuclei_infile)
