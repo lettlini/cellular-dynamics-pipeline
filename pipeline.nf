@@ -84,6 +84,7 @@ process nuclei_segmentation {
     publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
     label "high_cpu"
+    maxForks 1
 
     input:
     tuple path(fpath), val(basename)
