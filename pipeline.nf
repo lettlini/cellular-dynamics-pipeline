@@ -10,7 +10,7 @@ workflow {
     // This creates a tuple channel: [dir, basename]
     input_datasets = input_datasets.map { dir ->
         def basename = dir.name
-        [dir, basename]
+        [basename, dir]
     }
 
     // input_datasets.view { "Input file: ${it}" }
@@ -23,9 +23,11 @@ workflow {
     label_cell_approximation(cell_approximation.out.results)
     label_nuclei_segmentation(nuclei_segmentation.out.results)
 
-    structure_abstraction(label_nuclei_segmentation.out.results, label_cell_approximation.out.results)
+    // we need to JOIN these channels by the basename!
+    structure_abstraction(label_nuclei_segmentation.out.results.join(label_cell_approximation.out.results, by: [0], failOnDuplicate: true, failOnMismatch: true))
 
-    track_cells(label_cell_approximation.out.results, structure_abstraction.out.results)
+    // we need to JOIN these channels by the basename!
+    track_cells(label_cell_approximation.out.results.join(structure_abstraction.out.results, by: [0], failOnDuplicate: true, failOnMismatch: true))
 
     build_graphs(track_cells.out.results)
     annotate_graph_theoretical_observables(build_graphs.out.results)
@@ -40,10 +42,10 @@ process prepare_dataset_from_raw {
     label "low_cpu", "short_running"
 
     input:
-    tuple path(dataset_path), val(basename)
+    tuple val(basename), path(dataset_path)
 
     output:
-    tuple path("original_dataset.pickle"), val(basename), emit: results
+    tuple val(basename), path("original_dataset.pickle"), emit: results
 
     script:
     """
@@ -64,10 +66,10 @@ process confluency_filtering {
     label "low_cpu", "short_running"
 
     input:
-    tuple path(dataset_path), val(basename)
+    tuple val(basename), path(dataset_path)
 
     output:
-    tuple path("confluency_filtered.pickle"), val(basename), emit: results
+    tuple val(basename), path("confluency_filtered.pickle"), emit: results
 
     script:
     """
@@ -88,10 +90,10 @@ process nuclei_segmentation {
     maxForks 1
 
     input:
-    tuple path(fpath), val(basename)
+    tuple val(basename), path(fpath)
 
     output:
-    tuple path("nuclei_segmentation.pickle"), val(basename), emit: results
+    tuple val(basename), path("nuclei_segmentation.pickle"), emit: results
 
     script:
     """
@@ -110,10 +112,10 @@ process cell_approximation {
     publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
     input:
-    tuple path(fpath), val(basename)
+    tuple val(basename), path(fpath)
 
     output:
-    tuple path("cell_approximation.pickle"), val(basename), emit: results
+    tuple val(basename), path("cell_approximation.pickle"), emit: results
 
     script:
     """
@@ -127,19 +129,18 @@ process cell_approximation {
 }
 
 process structure_abstraction {
-    publishDir "${params.parent_dir_out}/${cell_basename}", mode: 'copy'
+    publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
     input:
-    tuple path(nuclei_fpath), val(nuclei_basename)
-    tuple path(cell_fpath), val(cell_basename)
+    tuple val(basename), path(nuclei_fpath), path(cell_fpath)
 
     output:
-    tuple path("abstract_structure.pickle"), val(nuclei_basename), emit: results
+    tuple val(basename), path("abstract_structure.pickle"), emit: results
 
     script:
     """
-    echo "Cell File Path: ${cell_fpath}, Basename: ${cell_basename}"
-    echo "Nuclei File Path: ${nuclei_fpath}, Basename: ${nuclei_basename}"
+    echo "Cell File Path: ${cell_fpath}, Basename: ${basename}"
+    echo "Nuclei File Path: ${nuclei_fpath}, Basename: ${basename}"
 
     python ${projectDir}/steps/structure_abstraction.py \
         --nuclei_infile="${nuclei_fpath}" \
@@ -156,10 +157,10 @@ process label_cell_approximation {
     label "short_running"
 
     input:
-    tuple path(fpath), val(basename)
+    tuple val(basename), path(fpath)
 
     output:
-    tuple path("cells_labelled.pickle"), val(basename), emit: results
+    tuple val(basename), path("cells_labelled.pickle"), emit: results
 
     script:
     """
@@ -177,10 +178,10 @@ process label_nuclei_segmentation {
     label "short_running"
 
     input:
-    tuple path(fpath), val(basename)
+    tuple val(basename), path(fpath)
 
     output:
-    tuple path("nuclei_labelled.pickle"), val(basename), emit: results
+    tuple val(basename), path("nuclei_labelled.pickle"), emit: results
 
     script:
     """
@@ -193,19 +194,18 @@ process label_nuclei_segmentation {
 }
 
 process track_cells {
-    publishDir "${params.parent_dir_out}/${cell_basename}", mode: 'copy'
+    publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
     input:
-    tuple path(cell_approximation_fpath), val(cell_basename)
-    tuple path(abstract_structure_fpath), val(as_basename)
+    tuple val(basename), path(cell_approximation_fpath), path(abstract_structure_fpath)
 
     output:
-    tuple path("tracked_abstract_structure.pickle"), val(cell_basename), emit: results
+    tuple val(basename), path("tracked_abstract_structure.pickle"), emit: results
 
     script:
     """
-    echo "Cell Approximation Path: ${cell_approximation_fpath}, Basename: ${cell_basename}"
-    echo "Abstract Structure Path: ${abstract_structure_fpath}, Basename: ${as_basename}"
+    echo "Cell Approximation Path: ${cell_approximation_fpath}, Basename: ${basename}"
+    echo "Abstract Structure Path: ${abstract_structure_fpath}, Basename: ${basename}"
     python ${projectDir}/steps/track_cells.py \
         --cell_label_file=${cell_approximation_fpath} \
         --abstract_structure_file=${abstract_structure_fpath} \
@@ -218,10 +218,10 @@ process build_graphs {
     publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
     input:
-    tuple path(abstract_structure_fpath), val(basename)
+    tuple val(basename), path(abstract_structure_fpath)
 
     output:
-    tuple path("graph_dataset.pickle"), val(basename), emit: results
+    tuple val(basename), path("graph_dataset.pickle"), emit: results
 
     script:
     """
@@ -240,10 +240,10 @@ process annotate_graph_theoretical_observables {
     label "high_cpu", "long_running"
 
     input:
-    tuple path(graph_dataset_fpath), val(basename)
+    tuple val(basename), path(graph_dataset_fpath)
 
     output:
-    tuple path("graph_dataset_annotated.pickle"), val(basename), emit: results
+    tuple val(basename), path("graph_dataset_annotated.pickle"), emit: results
 
     script:
     """
@@ -251,17 +251,17 @@ process annotate_graph_theoretical_observables {
     python ${projectDir}/steps/graph_theory_annotations.py \
         --infile=${graph_dataset_fpath} \
         --outfile="graph_dataset_annotated.pickle" \
-        --cpus=${task.cpus} \
+        --cpus=${task.cpus}
     """
 }
 process annotate_neighbor_retention {
     publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
     input:
-    tuple path(graph_dataset_fpath), val(basename)
+    tuple val(basename), path(graph_dataset_fpath)
 
     output:
-    tuple path("neighbor_retention_graph_ds.pickle"), val(basename), emit: results
+    tuple val(basename), path("neighbor_retention_graph_ds.pickle"), emit: results
 
     script:
     """
@@ -281,10 +281,10 @@ process annotate_D2min {
     label "long_running"
 
     input:
-    tuple path(graph_dataset_fpath), val(basename)
+    tuple val(basename), path(graph_dataset_fpath)
 
     output:
-    tuple path("D2min_annotated_graphs.pickle"), val(basename)
+    tuple val(basename), path("D2min_annotated_graphs.pickle"), emit: results
 
     script:
     """
@@ -296,6 +296,6 @@ process annotate_D2min {
         --lag_times_minutes=${params.lag_times_minutes} \
         --mum_per_px=${params.mum_per_px} \
         --minimum_neighbors=${params.minimum_neighbors} \
-        --cpus=${task.cpus} \
+        --cpus=${task.cpus}
     """
 }
