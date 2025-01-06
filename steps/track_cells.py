@@ -39,7 +39,7 @@ class OverlapTrackingTransformation:
             )
 
         return BaseDataSet(
-            ds_metadata=cell_label_ds.metadata, dataset_entries=new_data_dict
+            ds_metadata=cell_labels.metadata, dataset_entries=new_data_dict
         )
 
 

@@ -190,9 +190,7 @@ class IdentifyNeighborsTransformation(BaseMultiDataSetTransformation):
 
         return BaseDataSetEntry(identifier=entry.identifier, data=props)
 
-    def __call__(
-        self, merged_properties, cell_labels, parallel: bool = False, cpus: int = 1
-    ) -> Any:
+    def __call__(self, merged_properties, cell_labels, cpus: int = 1) -> Any:
         return super()._transform(
             cpus=cpus,
             merged_properties=merged_properties,
