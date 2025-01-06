@@ -23,5 +23,4 @@ nextflow run ~/cellular-dynamics-pipeline/pipeline.nf \
     -profile cluster \
     -with-report ${OUTPUT_DIR}/report.html \
     -with-timeline ${OUTPUT_DIR}/timeline.html \
-    -with-trace ${OUTPUT_DIR}/trace.txt \
-    -with-dag ${OUTPUT_DIR}/dag.png
+    -with-trace ${OUTPUT_DIR}/trace.txt
