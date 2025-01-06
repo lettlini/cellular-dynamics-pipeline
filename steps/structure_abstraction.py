@@ -113,7 +113,6 @@ class MergeCellNucleiInformation(BaseMultiDataSetTransformation):
         self, nuc_label_ds, cell_label_ds, nuc_prop_ds, cell_prop_ds
     ) -> BaseDataSet:
         return super()._transform(
-            self,
             nuclei_labels=nuc_label_ds,
             cell_labels=cell_label_ds,
             nuclei_properties=nuc_prop_ds,
@@ -191,11 +190,8 @@ class IdentifyNeighborsTransformation(BaseMultiDataSetTransformation):
 
         return BaseDataSetEntry(identifier=entry.identifier, data=props)
 
-    def __call__(
-        self, merged_properties, cell_labels, parallel: bool = False, cpus: int = 10
-    ) -> Any:
+    def __call__(self, merged_properties, cell_labels, cpus: int = 1) -> Any:
         return super()._transform(
-            parallel=parallel,
             cpus=cpus,
             merged_properties=merged_properties,
             cell_labels=cell_labels,
@@ -203,6 +199,9 @@ class IdentifyNeighborsTransformation(BaseMultiDataSetTransformation):
 
 
 if __name__ == "__main__":
+
+    cv2.setNumThreads(0)
+
     parser = ArgumentParser()
 
     parser.add_argument(
@@ -223,17 +222,30 @@ if __name__ == "__main__":
     parser.add_argument(
         "--outfile", required=True, type=str, help="Path to output file"
     )
+    parser.add_argument(
+        "--cpus",
+        required=True,
+        type=int,
+        help="CPU cores to use.",
+    )
 
     args = parser.parse_args()
 
     cells_labelled_ds = BaseDataSet.from_pickle(args.cells_infile)
     nuclei_labelled_ds = BaseDataSet.from_pickle(args.nuclei_infile)
 
-    cell_properties = ObjectInformationTransform(args.mum_per_px)(cells_labelled_ds)
-    nuclei_properties = ObjectInformationTransform(args.mum_per_px)(nuclei_labelled_ds)
+    cell_properties = ObjectInformationTransform(args.mum_per_px)(
+        cells_labelled_ds, cpus=args.cpus
+    )
+    nuclei_properties = ObjectInformationTransform(args.mum_per_px)(
+        nuclei_labelled_ds, cpus=args.cpus
+    )
 
     all_properties_merged = MergeCellNucleiInformation()(
-        nuclei_labelled_ds, cells_labelled_ds, nuclei_properties, cell_properties
+        nuc_label_ds=nuclei_labelled_ds,
+        cell_label_ds=cells_labelled_ds,
+        nuc_prop_ds=nuclei_properties,
+        cell_prop_ds=cell_properties,
     )
 
     all_properties_merged_neighbors = IdentifyNeighborsTransformation(
@@ -241,7 +253,7 @@ if __name__ == "__main__":
     )(
         merged_properties=all_properties_merged,
         cell_labels=cells_labelled_ds,
-        parallel=True,
+        cpus=args.cpus,
     )
 
     all_properties_merged_neighbors.to_pickle(args.outfile)

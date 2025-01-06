@@ -34,9 +34,17 @@ if __name__ == "__main__":
         type=str,
         help="Path to output file.",
     )
+    parser.add_argument(
+        "--cpus",
+        required=True,
+        type=int,
+        help="CPU cores to use.",
+    )
 
     args = parser.parse_args()
 
+    cv2.setNumThreads(0)
+
     x = BaseDataSet.from_pickle(args.infile)
-    x = LabelImagesTransformation()(x)
+    x = LabelImagesTransformation()(x, cpus=args.cpus)
     x.to_pickle(args.outfile)

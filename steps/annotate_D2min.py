@@ -11,17 +11,29 @@ from utils import get_future_label, get_object_positions
 
 
 class D2minAnnotationTransformation:
-    def __init__(self, mum_per_px: float, lag_time_frames: int) -> None:
+    def __init__(
+        self, mum_per_px: float, lag_time_frames: int, mininum_neighbors: int
+    ) -> None:
         self._mum_per_px = mum_per_px
         self._lag_time_frames = lag_time_frames
+        self._minimum_neighbors = mininum_neighbors
 
     @staticmethod
-    def _calc_D2min(strain_tensor, dij_now, deltadij) -> float:
+    def _calc_D2min(strain_tensor, dij_now, dij_future) -> float:
+
+        # dij_now: array of shape (N, 2)
+        # dij_future array of shape (N,2)
+
+        assert dij_now.shape[0] == dij_future.shape[0]
+        assert dij_now.shape[1] == 2
+        assert dij_future.shape[1] == 2
 
         strain_tensor = np.reshape(strain_tensor, (2, 2))
-        x = deltadij - (dij_now @ strain_tensor)
+        diff = dij_future - (dij_now @ strain_tensor.T)  # diff has shape (N, 2)
 
-        return (x**2).sum(axis=1).mean()
+        assert diff.shape[0] == dij_now.shape[0]
+        assert diff.shape[1] == 2
+        return (diff**2).sum(axis=1).mean()
 
     def _annotate_single_node(
         self,
@@ -61,21 +73,24 @@ class D2minAnnotationTransformation:
                     )
                 )
 
-        if len(neighbor_current_positions) == 0:
+        if len(neighbor_current_positions) <= self._minimum_neighbors:
             return np.NaN
 
         neighbor_current_positions = np.vstack(neighbor_current_positions)
         neighbor_future_positions = np.vstack(neighbor_future_positions)
 
-        dij = neighbor_current_positions - current_own_position
-        dij_tilde = neighbor_future_positions - future_own_position
-        delta_dij = dij_tilde - dij
+        dij_now = neighbor_current_positions - current_own_position
+        dij_future = neighbor_future_positions - future_own_position
 
         min_result = minimize(
             D2minAnnotationTransformation._calc_D2min,
-            x0=np.zeros(4),
-            args=(dij, delta_dij),
+            x0=np.eye(2).reshape((4,)),
+            args=(dij_now, dij_future),
+            tol=1e-3,
         )
+        if not min_result.success:
+            raise RuntimeError("Minimize did not succeed.")
+
         D2min = min_result.fun.item() * (self._mum_per_px**2)
 
         return D2min
@@ -134,6 +149,12 @@ if __name__ == "__main__":
         help="Path to output file.",
     )
     parser.add_argument(
+        "--minimum_neighbors",
+        required=True,
+        type=int,
+        help="Minimum number of neighbors for D2min calculation.",
+    )
+    parser.add_argument(
         "--cpus",
         required=True,
         type=int,
@@ -149,7 +170,9 @@ if __name__ == "__main__":
 
     for lt_frames, lt_minutes in zip(lag_times_frames, lag_times_minutes, strict=True):
         x = D2minAnnotationTransformation(
-            mum_per_px=args.mum_per_px, lag_time_frames=lt_frames
+            mum_per_px=args.mum_per_px,
+            lag_time_frames=lt_frames,
+            mininum_neighbors=args.minimum_neighbors,
         )(x, property_suffix=f"{lt_minutes}_minutes")
 
     x.to_pickle(args.outfile)

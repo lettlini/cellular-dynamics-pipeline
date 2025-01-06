@@ -1,6 +1,5 @@
 from argparse import ArgumentParser
 
-import cv2
 import networkx as nx
 import numpy as np
 from core_data_utils.datasets import BaseDataSet, BaseDataSetEntry
@@ -194,13 +193,21 @@ if __name__ == "__main__":
         type=str,
         help="Path to output file.",
     )
+    parser.add_argument(
+        "--cpus",
+        required=True,
+        type=int,
+        help="CPU cores to use.",
+    )
 
     args = parser.parse_args()
 
     x = BaseDataSet.from_pickle(args.infile)
-    x = BuildGraphTransform(args.mum_per_px)(x)
-    x = CalculateCellNucleusShapeTransformation()(x)
-    x = CalculateOrderParameter("cell_major_axis_angle_rad", "cell")(x)
-    x = CalculateOrderParameter("nucleus_major_axis_angle_rad", "nucleus")(x)
+    x = BuildGraphTransform(args.mum_per_px)(x, cpus=args.cpus)
+    x = CalculateCellNucleusShapeTransformation()(x, cpus=args.cpus)
+    x = CalculateOrderParameter("cell_major_axis_angle_rad", "cell")(x, cpus=args.cpus)
+    x = CalculateOrderParameter("nucleus_major_axis_angle_rad", "nucleus")(
+        x, cpus=args.cpus
+    )
 
     x.to_pickle(args.outfile)

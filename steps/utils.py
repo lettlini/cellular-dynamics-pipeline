@@ -11,7 +11,11 @@ def get_object_positions(graph_ds, node_label, sindex, prefix="cell"):
     x = graph_ds[sindex].data.nodes[node_label][f"{prefix}_centroid_x"]
     y = graph_ds[sindex].data.nodes[node_label][f"{prefix}_centroid_y"]
 
-    return np.array([x, y])
+    position_vector = np.array([x, y])
+    position_vector = position_vector[
+        np.newaxis, :
+    ]  # always return vector of shape (1,2)
+    return position_vector
 
 
 def get_future_label(

@@ -173,4 +173,5 @@ cython_debug/
 .nextflow*
 work/
 
-workbook.ipynb
+workbook*.ipynb
+debug/

@@ -1,10 +1,8 @@
-import pickle
 from argparse import ArgumentParser
 
 import cv2
 import numpy as np
 from core_data_utils.datasets import BaseDataSet, BaseDataSetEntry
-from core_data_utils.datasets.image import ImageDataset
 from core_data_utils.transformations import BaseDataSetTransformation
 from nuclei_segmentation import get_disconnected
 
@@ -75,6 +73,9 @@ class CellApproximationTransform(BaseDataSetTransformation):
 
 
 if __name__ == "__main__":
+
+    cv2.setNumThreads(0)
+
     parser = ArgumentParser()
     parser.add_argument(
         "--infile", required=True, type=str, help="Absolute path to input file"
@@ -88,11 +89,19 @@ if __name__ == "__main__":
         type=float,
         help="Maximum radius of individual cells",
     )
+    parser.add_argument(
+        "--cpus",
+        required=True,
+        type=int,
+        help="CPU cores to use.",
+    )
 
     args = parser.parse_args()
 
     x = BaseDataSet.from_pickle(args.infile)
 
-    x = CellApproximationTransform(cell_cutoff_px=args.cell_cutoff_px)(dataset=x)
+    x = CellApproximationTransform(cell_cutoff_px=args.cell_cutoff_px)(
+        dataset=x, cpus=args.cpus
+    )
 
     x.to_pickle(args.outfile)

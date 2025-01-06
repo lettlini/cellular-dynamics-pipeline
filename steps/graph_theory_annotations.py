@@ -84,6 +84,6 @@ if __name__ == "__main__":
 
     x = BaseDataSet.from_pickle(args.infile)
 
-    x = GraphTheoreticalAnnotationsTransform()(dataset=x, parallel=True, cpus=args.cpus)
+    x = GraphTheoreticalAnnotationsTransform()(dataset=x, cpus=args.cpus)
 
     x.to_pickle(args.outfile)

@@ -39,7 +39,7 @@ class OverlapTrackingTransformation:
             )
 
         return BaseDataSet(
-            ds_metadata=cell_label_ds.metadata, dataset_entries=new_data_dict
+            ds_metadata=cell_labels.metadata, dataset_entries=new_data_dict
         )
 
 
@@ -60,6 +60,12 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--outfile", required=True, type=str, help="Path to output file."
+    )
+    parser.add_argument(
+        "--cpus",
+        required=True,
+        type=int,
+        help="CPU cores to use.",
     )
 
     args = parser.parse_args()
