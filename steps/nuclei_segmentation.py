@@ -8,11 +8,6 @@ from core_data_utils.datasets.image import ImageDataset
 from core_data_utils.transformations import BaseDataSetTransformation
 from stardist.models import StarDist2D
 
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = (
-    "3"  # prevent stardist / tensorflow from complaining
-)
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-
 
 def get_disconnected(timage: np.array) -> np.array:
     """Disconnects touching regions with different labels (stardist)"""
@@ -147,20 +142,6 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-
-    # limit opencv threads to not oversubscribe
-    cv2.setNumThreads(args.cpus)
-
-    # limit tensorflow threads to not oversubscribe
-    os.environ["TF_NUM_INTRAOP_THREADS"] = str(
-        args.cpus
-    )  # Use all cores for intra-op parallelism
-    os.environ["TF_NUM_INTEROP_THREADS"] = str(
-        args.cpus // 2
-    )  # Use half of the cores for inter-op parallelism
-    os.environ["OMP_NUM_THREADS"] = str(
-        args.cpus
-    )  # Set OpenMP threads to the allocated cores
 
     x = BaseDataSet.from_pickle(args.infile)
 
