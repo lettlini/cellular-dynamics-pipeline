@@ -278,7 +278,7 @@ process annotate_neighbor_retention {
 process annotate_D2min {
     publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
-    label "long_running"
+    label "long_running", "low_cpu"
 
     input:
     tuple val(basename), path(graph_dataset_fpath)
