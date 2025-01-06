@@ -73,13 +73,16 @@ class StarDistSegmentationTransform(BaseDataSetTransformation):
 
         image = entry.data
 
-        labels, _ = self._stardist_model.predict_instances(
-            image, prob_thresh=self._probability_threshold
-        )
+        labels, info = self._stardist_model.predict_instances(image)
 
         # We need to disconnect touching labels:
         dmask = get_disconnected(labels)
         labels[dmask == 1] = 0
+
+        if self._probability_threshold is not None:
+            for j in range(len(info["prob"])):
+                if info["prob"][j] < self._probability_threshold:
+                    labels[labels == j + 1] = 0
 
         # convert label image to binary mask
         labels = (labels > 0).astype(np.int8)
