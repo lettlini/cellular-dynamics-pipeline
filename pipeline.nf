@@ -87,7 +87,7 @@ process confluency_filtering {
 process nuclei_segmentation {
     publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
 
-    label "high_cpu"
+    label "high_cpu", "long_running"
     maxForks 1
 
     input:
