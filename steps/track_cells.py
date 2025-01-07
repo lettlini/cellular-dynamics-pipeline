@@ -20,17 +20,24 @@ class OverlapTrackingTransformation:
 
         for i in trange(len(cell_labels) - 1):
             centry = cell_labels[i]
-            nentry = cell_labels[i + 1]
             current_props = properties[i].data
 
-            current_tracking_map = overlap_tracking.single_timestep_overlap_tracking(
-                centry.data, nentry.data, self._ignore_labels
-            )
+            # if we are in the index range for tracking add tracking informtion
+            # otherwise add properties unchanged as future processes will expect
+            # nodes without tracking information rather than relying on index information
+            if i < len(cell_labels) - 2:
+                nentry = cell_labels[i + 1]
 
-            for current_label, next_label in current_tracking_map.items():
-                assert current_label in current_props
-                assert "next_object_id" not in current_props[current_label]
-                current_props[current_label]["next_object_id"] = next_label
+                current_tracking_map = (
+                    overlap_tracking.single_timestep_overlap_tracking(
+                        centry.data, nentry.data, self._ignore_labels
+                    )
+                )
+
+                for current_label, next_label in current_tracking_map.items():
+                    assert current_label in current_props
+                    assert "next_object_id" not in current_props[current_label]
+                    current_props[current_label]["next_object_id"] = next_label
 
             new_data_dict[centry.identifier] = BaseDataSetEntry(
                 identifier=centry.identifier,

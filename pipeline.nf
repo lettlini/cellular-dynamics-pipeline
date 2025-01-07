@@ -33,6 +33,7 @@ workflow {
     annotate_graph_theoretical_observables(build_graphs.out.results)
     annotate_neighbor_retention(annotate_graph_theoretical_observables.out.results)
     annotate_D2min(annotate_neighbor_retention.out.results)
+    assemble_cell_track_dataframe(annotate_D2min.out.results)
 }
 
 process prepare_dataset_from_raw {
@@ -296,6 +297,29 @@ process annotate_D2min {
         --lag_times_minutes=${params.lag_times_minutes} \
         --mum_per_px=${params.mum_per_px} \
         --minimum_neighbors=${params.minimum_neighbors} \
+        --cpus=${task.cpus}
+    """
+}
+
+process assemble_cell_track_dataframe {
+    publishDir "${params.parent_dir_out}/${basename}", mode: 'copy'
+
+    label "short_running", "low_cpu"
+
+    input:
+    tuple val(basename), path(graph_dataset_fpath)
+
+    output:
+    tuple val(basename), path("cell_tracks.ipc"), emit: results
+
+    script:
+    """
+    python ${projectDir}/steps/assemble_tracking_df.py \
+        --infile=${graph_dataset_fpath} \
+        --outfile="cell_tracks.ipc" \
+        --delta_t_minutes=${params.delta_t_minutes} \
+        --include_attrs=${params.include_attrs} \
+        --exclude_attrs=${params.exclude_attrs} \
         --cpus=${task.cpus}
     """
 }
