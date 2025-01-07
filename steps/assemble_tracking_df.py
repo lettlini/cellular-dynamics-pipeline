@@ -91,7 +91,7 @@ class CellTrackAssembler:
         current_props["starting_frame"] = sindex
         new_df_rows.append(current_props)
 
-        while (nobj_id is not None) and (sindex + track_time_index + 1) < len(tds):
+        while nobj_id is not None:
             track_time_index += 1
             current_props, nobj_id = self._get_node_information(
                 tds,
