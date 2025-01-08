@@ -13,9 +13,6 @@ mkdir -p $OUTPUT_DIR  # Create the output directory if it doesn't exist
 
 # Load Nextflow module
 module load Nextflow
-
-# Load Graphviz module
-module load Graphviz
 CONFIG_ID=$1
 
 nextflow run ~/cellular-dynamics-pipeline/pipeline.nf \
