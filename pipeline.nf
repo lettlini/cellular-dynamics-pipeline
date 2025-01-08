@@ -69,7 +69,7 @@ process prepare_dataset_from_raw {
     """
     echo "Processing: ${basename}"
     echo "Dataset Path: ${dataset_path}, Basename: ${basename}"
-    python ${projectDir}/steps/prepare_dataset.py \
+    python ${projectDir}/scripts/prepare_dataset.py \
         --indir="${dataset_path}" \
         --outfile="original_dataset.pickle" \
         --provider=${params.provider} \
