@@ -1,6 +1,6 @@
 include { label_objects                          } from './cellular-dynamics-nf-modules/modules/image_processing/label_objects/main.nf'
 include { nuclei_segmentation                    } from './cellular-dynamics-nf-modules/modules/image_processing/nuclei_segmentation/main.nf'
-include { basic_filter                           } from './cellular-dynamics-nf-modules/modules/image_processing/basic_filter/main.nf'
+include { basic_filter as confluency_filter      } from './cellular-dynamics-nf-modules/modules/image_processing/basic_filter/main.nf'
 include { cell_approximation                     } from './cellular-dynamics-nf-modules/modules/image_processing/cell_approximation/main.nf'
 include { label_objects as label_nuclei ; label_objects as label_cells } from './cellular-dynamics-nf-modules/modules/image_processing/label_objects/main.nf'
 include { structure_abstraction                  } from './cellular-dynamics-nf-modules/modules/graph_processing/structure_abstraction/main.nf'
@@ -26,10 +26,10 @@ workflow {
     min_nucleus_area_pxsq = Channel.value(params.min_nucleus_area_mumsq / (params.mum_per_px ** 2))
     cell_cutoff_px = Channel.value(params.cell_cutoff_mum / params.mum_per_px)
 
-    prepare_dataset_from_raw(input_datasets, parent_dir_out)
-    basic_filter(prepare_dataset_from_raw.out.results, params.drop_first_n, params.drop_last_m, parent_dir_out)
+    prepare_dataset_from_raw(input_datasets, params.provider, parent_dir_out)
+    confluency_filter(prepare_dataset_from_raw.out.results, params.drop_first_n, params.drop_last_m, parent_dir_out)
     nuclei_segmentation(
-        basic_filter.out.results,
+        confluency_filter.out.results,
         params.stardist_probality_threshold,
         min_nucleus_area_pxsq,
         parent_dir_out,
@@ -60,6 +60,7 @@ process prepare_dataset_from_raw {
 
     input:
     tuple val(basename), path(dataset_path)
+    val provider
     val parent_dir_out
 
     output:
@@ -72,7 +73,7 @@ process prepare_dataset_from_raw {
     python ${projectDir}/scripts/prepare_dataset.py \
         --indir="${dataset_path}" \
         --outfile="original_dataset.pickle" \
-        --provider=${params.provider} \
+        --provider=${provider} \
         --cpus=${task.cpus}
     """
 }
