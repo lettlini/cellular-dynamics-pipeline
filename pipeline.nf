@@ -50,6 +50,7 @@ workflow {
     annotate_neighbor_retention(annotate_graph_theoretical_observables.out.results, params.delta_t_minutes, params.lag_times_minutes, parent_dir_out)
     annotate_D2min(annotate_neighbor_retention.out.results, params.delta_t_minutes, params.lag_times_minutes, params.mum_per_px, params.minimum_neighbors, parent_dir_out)
     assemble_cell_track_dataframe(annotate_D2min.out.results, params.delta_t_minutes, params.include_attrs, params.exclude_attrs, parent_dir_out)
+    add_cell_culture_metadata(assemble_cell_track_dataframe.out.results, args.provider, parent_dir_out)
 }
 
 process prepare_dataset_from_raw {
@@ -73,6 +74,30 @@ process prepare_dataset_from_raw {
     python ${projectDir}/scripts/prepare_dataset.py \
         --indir="${dataset_path}" \
         --outfile="original_dataset.pickle" \
+        --provider=${provider} \
+        --cpus=${task.cpus}
+    """
+}
+
+process add_cell_culture_metadata {
+
+    publishDir "${parent_dir_out}/${basename}", mode: 'copy'
+
+    label "low_cpu", "short_running"
+
+    input:
+    tuple val(basename), path(cell_track_df_path)
+    val provider
+    val parent_dir_out
+
+    output:
+    tuple val(basename), path("cell_tracks_with_metadata.pickle"), emit: results
+
+    script:
+    """
+    python ${projectDir}/scripts/prepare_dataset.py \
+        --indir="${cell_track_df_path}" \
+        --outfile="cell_tracks_with_metadata.pickle" \
         --provider=${provider} \
         --cpus=${task.cpus}
     """
