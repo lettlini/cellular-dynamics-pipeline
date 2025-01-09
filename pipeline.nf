@@ -91,13 +91,13 @@ process add_cell_culture_metadata {
     val parent_dir_out
 
     output:
-    tuple val(basename), path("cell_tracks_with_metadata.pickle"), emit: results
+    tuple val(basename), path("cell_tracks_with_metadata.ipc"), emit: results
 
     script:
     """
     python ${projectDir}/scripts/add_dataset_metadata.py \
         --infile="${cell_track_df_path}" \
-        --outfile="cell_tracks_with_metadata.pickle" \
+        --outfile="cell_tracks_with_metadata.ipc" \
         --basename=${basename} \
         --provider=${provider} \
         --cpus=${task.cpus}
