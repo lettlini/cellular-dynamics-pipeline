@@ -71,5 +71,8 @@ if __name__ == "__main__":
     cell_tracking_df = cell_tracking_df.with_columns(
         pl.lit(cell_culture_methodology).alias("cell_culture_methodology")
     )
+    cell_tracking_df = cell_tracking_df.with_columns(
+        pl.lit(args.provider.lower()).alias("dataset_provider")
+    )
 
     cell_tracking_df.write_ipc(args.outfile, compression="lz4")
