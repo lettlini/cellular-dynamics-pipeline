@@ -15,8 +15,8 @@ mkdir -p $OUTPUT_DIR  # Create the output directory if it doesn't exist
 module load Nextflow
 CONFIG_ID=$1
 
-nextflow run ~/cellular-dynamics-pipeline/pipeline.nf \
-    -c ~/cellular-dynamics-pipeline/dataset_configs/$CONFIG_ID.config \
+nextflow run ./pipeline.nf \
+    -c ./dataset_configs/$CONFIG_ID.config \
     -profile cluster \
     -with-report ${OUTPUT_DIR}/report.html \
     -with-timeline ${OUTPUT_DIR}/timeline.html \
