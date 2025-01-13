@@ -10,7 +10,7 @@ include { annotate_graph_theoretical_observables } from './cellular-dynamics-nf-
 include { annotate_neighbor_retention            } from './cellular-dynamics-nf-modules/modules/tracking/annotate_neighbor_retention/main.nf'
 include { annotate_D2min                         } from './cellular-dynamics-nf-modules/modules/tracking/annotate_D2min/main.nf'
 include { assemble_cell_track_dataframe          } from './cellular-dynamics-nf-modules/modules/tracking/assemble_cell_tracks_dataframe/main.nf'
-
+include { calculate_local_density                } from './cellular-dynamics-nf-modules/modules/graph_processing/calculate_local_density/main.nf'
 workflow {
 
     input_datasets = Channel.fromPath(file(params.parent_indir).resolve(params.in_dir).toString(), type: "dir")
@@ -46,7 +46,8 @@ workflow {
 
     cell_tracking_overlap(label_cells.out.results.join(structure_abstraction.out.results, by: [0], failOnDuplicate: true, failOnMismatch: true), parent_dir_out)
     build_graphs(cell_tracking_overlap.out.results, params.mum_per_px, parent_dir_out)
-    annotate_graph_theoretical_observables(build_graphs.out.results, parent_dir_out)
+    calculate_local_density(build_graphs.out.results, parent_dir_out)
+    annotate_graph_theoretical_observables(calculate_local_density.out.results, parent_dir_out)
     annotate_neighbor_retention(annotate_graph_theoretical_observables.out.results, params.delta_t_minutes, params.lag_times_minutes, parent_dir_out)
     annotate_D2min(annotate_neighbor_retention.out.results, params.delta_t_minutes, params.lag_times_minutes, params.mum_per_px, params.minimum_neighbors, parent_dir_out)
     assemble_cell_track_dataframe(annotate_D2min.out.results, params.delta_t_minutes, params.include_attrs, params.exclude_attrs, parent_dir_out)
