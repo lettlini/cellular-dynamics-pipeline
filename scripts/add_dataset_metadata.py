@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+
 import polars as pl
 
 
