@@ -13,6 +13,11 @@ mkdir -p $OUTPUT_DIR  # Create the output directory if it doesn't exist
 
 # Load Nextflow module
 module load Nextflow
+
+# load Mamba module & make sure conda and mamba are on the path
+module load Mamba
+source /software/easybuild/el8/amd_zen1/all/Mamba/23.1.0-4/etc/profile.d/conda.sh
+
 CONFIG_ID=$1
 
 nextflow run ./pipeline.nf \
