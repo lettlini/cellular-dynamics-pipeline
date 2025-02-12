@@ -1,0 +1,11 @@
+name: data-preparation_default
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - pip:
+    - opencv-python
+    - git+https://github.com/lettlini/core-data-utils
+    - polars
+    - numpy
