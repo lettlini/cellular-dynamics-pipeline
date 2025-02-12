@@ -86,7 +86,7 @@ process prepare_dataset_from_raw {
     """
     echo "Processing: ${basename}"
     echo "Dataset Path: ${dataset_path}, Basename: ${basename}"
-    python ${projectDir}/scripts/prepare_dataset.py \
+    python ${moduleDir}/scripts/prepare_dataset.py \
         --indir="${dataset_path}" \
         --outfile="original_dataset.pickle" \
         --provider=${provider} \
@@ -112,7 +112,7 @@ process add_cell_culture_metadata {
 
     script:
     """
-    python ${projectDir}/scripts/add_dataset_metadata.py \
+    python ${moduleDir}/scripts/add_dataset_metadata.py \
         --infile="${cell_track_df_path}" \
         --outfile="cell_tracks_with_metadata.ipc" \
         --basename=${basename} \
