@@ -14,7 +14,7 @@ include { calculate_local_density                } from './cellular-dynamics-nf-
 include { concatenate_tracking_dataframes        } from './cellular-dynamics-nf-modules/modules/tracking/concatenate_tracking_dataframes/main.nf'
 include { nucleus_displacement_index             } from './cellular-dynamics-nf-modules/modules/image_processing/nucleus_displacement_index/main.nf'
 include { cage_relative_squared_displacement     } from './cellular-dynamics-nf-modules/modules/tracking/cage_relative_squared_displacement/main.nf'
-include { cage_relative_squared_displacement     } from '../cellular-dynamics-nf-modules/modules/tracking/cage_relative_squared_displacement/main.nf'
+include { cage_relative_squared_displacement     } from './cellular-dynamics-nf-modules/modules/tracking/cage_relative_squared_displacement/main.nf'
 
 workflow data_preparation {
     take:
