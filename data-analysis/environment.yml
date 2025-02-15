@@ -1,0 +1,17 @@
+name: datan-fatty_tissue
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - texlive-core
+  - pip:
+    - tqdm
+    - numpy<2
+    - scipy
+    - polars
+    - matplotlib
+    - seaborn
+    - pyarrow
+    - networkx
+    - git+https://github.com/lettlini/core-data-utils
