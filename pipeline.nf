@@ -1,5 +1,5 @@
 include { data_preparation } from './data-preparation/pipeline.nf'
-//include { data_analysis    } from './data-analysis/pipeline.nf'
+include { data_analysis    } from './data-analysis/pipeline.nf'
 
 workflow {
 
@@ -11,4 +11,5 @@ workflow {
         [basename, dir]
     }
         | data_preparation
+        | data_analysis
 }
