@@ -45,12 +45,8 @@ workflow data_preparation {
 
     cell_tracking_overlap(label_cells.out.results.join(structure_abstraction.out.results, by: [0], failOnDuplicate: true, failOnMismatch: true), parent_dir_out)
     build_graphs(cell_tracking_overlap.out.results, params.mum_per_px, parent_dir_out)
-    nucleus_displacement_index(
-        label_nuclei.out.results.join(label_cells.out.results, failOnDuplicate: true, failOnMismatch: true).join(build_graphs.out.results, failOnDuplicate: true, failOnMismatch: true),
-        parent_dir_out,
-    )
 
-    calculate_local_density(nucleus_displacement_index.out.results, parent_dir_out).collect()
+    calculate_local_density(build_graphs.out.results, parent_dir_out)
     annotate_graph_theoretical_observables(calculate_local_density.out.results, parent_dir_out)
     annotate_neighbor_retention(annotate_graph_theoretical_observables.out.results, params.delta_t_minutes, params.lag_times_minutes, parent_dir_out)
     cage_relative_squared_displacement(annotate_neighbor_retention.out.results, params.delta_t_minutes, params.lag_times_minutes, params.mum_per_px, parent_dir_out)
