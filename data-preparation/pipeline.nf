@@ -22,6 +22,12 @@ workflow data_preparation {
     main:
 
     parent_dir_out = file(params.parent_outdir_preparation).resolve(params.out_dir).toString()
+
+    // avoid having data from previous runs in publish dir
+    new File(parent_dir_out).deleteDir()
+    new File(parent_dir_out).mkdirs()
+
+
     min_nucleus_area_pxsq = Channel.value(params.min_nucleus_area_mumsq / (params.mum_per_px ** 2))
     cell_cutoff_px = Channel.value(params.cell_cutoff_mum / params.mum_per_px)
 
