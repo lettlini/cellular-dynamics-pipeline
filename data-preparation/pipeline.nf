@@ -22,6 +22,13 @@ workflow data_preparation {
     main:
 
     parent_dir_out = Channel.value(file(params.parent_outdir_preparation).resolve(params.out_dir).toString())
+
+    // to avoid having data from previous pipeline runs we first clean the output directory
+    // delete
+    new File(parent_dir_out).deleteDir()
+    // make sure it exists
+    new File(parent_dir_out).mkdirs()
+
     min_nucleus_area_pxsq = Channel.value(params.min_nucleus_area_mumsq / (params.mum_per_px ** 2))
     cell_cutoff_px = Channel.value(params.cell_cutoff_mum / params.mum_per_px)
 
