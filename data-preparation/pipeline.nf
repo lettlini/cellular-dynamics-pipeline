@@ -21,7 +21,7 @@ workflow data_preparation {
 
     main:
 
-    parent_dir_out = Channel.value(file(params.parent_outdir_preparation).resolve(params.out_dir).toString())
+    parent_dir_out = file(params.parent_outdir_preparation).resolve(params.out_dir).toString()
 
     // to avoid having data from previous pipeline runs we first clean the output directory
     // delete
