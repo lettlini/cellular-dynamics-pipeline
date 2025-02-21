@@ -1,6 +1,6 @@
 include { label_objects                          } from './cellular-dynamics-nf-modules/modules/image_processing/label_objects/main.nf'
 include { nuclei_segmentation                    } from './cellular-dynamics-nf-modules/modules/image_processing/nuclei_segmentation/main.nf'
-include { basic_filter as confluency_filter      } from './cellular-dynamics-nf-modules/modules/image_processing/basic_filter/main.nf'
+include { confluency_filter                      } from './cellular-dynamics-nf-modules/modules/image_processing/basic_filter/main.nf'
 include { cell_approximation                     } from './cellular-dynamics-nf-modules/modules/image_processing/cell_approximation/main.nf'
 include { label_objects as label_nuclei ; label_objects as label_cells } from './cellular-dynamics-nf-modules/modules/image_processing/label_objects/main.nf'
 include { structure_abstraction                  } from './cellular-dynamics-nf-modules/modules/graph_processing/structure_abstraction/main.nf'
@@ -12,77 +12,84 @@ include { annotate_D2min                         } from './cellular-dynamics-nf-
 include { assemble_cell_track_dataframe          } from './cellular-dynamics-nf-modules/modules/tracking/assemble_cell_tracks_dataframe/main.nf'
 include { calculate_local_density                } from './cellular-dynamics-nf-modules/modules/graph_processing/calculate_local_density/main.nf'
 include { concatenate_tracking_dataframes        } from './cellular-dynamics-nf-modules/modules/tracking/concatenate_tracking_dataframes/main.nf'
-include { nucleus_displacement_index             } from './cellular-dynamics-nf-modules/modules/image_processing/nucleus_displacement_index/main.nf'
 include { cage_relative_squared_displacement     } from './cellular-dynamics-nf-modules/modules/tracking/cage_relative_squared_displacement/main.nf'
-
 workflow data_preparation {
     take:
     input_datasets
 
     main:
 
-    parent_dir_out = file(params.parent_outdir_preparation).resolve(params.out_dir).toString()
+    publish_dir = params.parent_outdir_preparation + params.out_dir
 
-    // avoid having data from previous runs in publish dir
-    new File(parent_dir_out).deleteDir()
-    new File(parent_dir_out).mkdirs()
+    // clear the parent_outdir
+    new File(publish_dir).deleteDir()
+    new File(publish_dir).mkdirs()
 
+    prepare_dataset_from_raw(input_datasets, publish_dir)
+    nuclei_segmentation(prepare_dataset_from_raw.out.results, params.min_nucleus_area_mumsq, publish_dir)
+    confluency_filter(nuclei_segmentation.out.results, "nuclei", publish_dir)
 
-    min_nucleus_area_pxsq = Channel.value(params.min_nucleus_area_mumsq / (params.mum_per_px ** 2))
-    cell_cutoff_px = Channel.value(params.cell_cutoff_mum / params.mum_per_px)
+    label_nuclei(nuclei_segmentation.out.results, "nuclei", publish_dir)
+    cell_approximation(nuclei_segmentation.out.results, params.cell_cutoff_mum, publish_dir)
+    label_cells(cell_approximation.out.results, "cells", publish_dir)
 
-    prepare_dataset_from_raw(input_datasets, params.provider, parent_dir_out)
-    confluency_filter(prepare_dataset_from_raw.out.results, params.drop_first_n, params.drop_last_m, parent_dir_out)
-    nuclei_segmentation(
-        confluency_filter.out.results,
-        params.stardist_probality_threshold,
-        min_nucleus_area_pxsq,
-        parent_dir_out,
-    )
-    cell_approximation(nuclei_segmentation.out.results, cell_cutoff_px, parent_dir_out)
-    label_nuclei(nuclei_segmentation.out.results, "nuclei", parent_dir_out)
-    label_cells(cell_approximation.out.results, "cells", parent_dir_out)
+    structure_abstraction_input = label_nuclei.out.results
+        .join(label_cells.out.results, by: [0], failOnDuplicate: true, failOnMismatch: true)
+        .map {
+            // (0: id, 1: file1, 2: conf1, 3: file2, 4: conf2)
+            tuple(
+                it[0],
+                it[1],
+                it[3],
+                it[2],
+            )
+        }
 
-    structure_abstraction(
-        label_nuclei.out.results.join(label_cells.out.results, by: [0], failOnDuplicate: true, failOnMismatch: true),
-        params.mum_per_px,
-        parent_dir_out,
-    )
+    structure_abstraction(structure_abstraction_input, publish_dir)
 
-    cell_tracking_overlap(label_cells.out.results.join(structure_abstraction.out.results, by: [0], failOnDuplicate: true, failOnMismatch: true), parent_dir_out)
-    build_graphs(cell_tracking_overlap.out.results, params.mum_per_px, parent_dir_out)
+    cell_tracking_overlap_input = label_cells.out.results.join(structure_abstraction.out.results, by: [0], failOnDuplicate: true, failOnMismatch: true)
+        | map {
+            tuple(
+                it[0],
+                it[1],
+                it[3],
+                it[2],
+            )
+        }
 
-    calculate_local_density(build_graphs.out.results, parent_dir_out)
-    annotate_graph_theoretical_observables(calculate_local_density.out.results, parent_dir_out)
-    annotate_neighbor_retention(annotate_graph_theoretical_observables.out.results, params.delta_t_minutes, params.lag_times_minutes, parent_dir_out)
-    cage_relative_squared_displacement(annotate_neighbor_retention.out.results, params.delta_t_minutes, params.lag_times_minutes, params.mum_per_px, parent_dir_out)
-    all_graph_datasets = annotate_D2min(cage_relative_squared_displacement.out.results, params.delta_t_minutes, params.lag_times_minutes, params.mum_per_px, params.minimum_neighbors, parent_dir_out)
+    cell_tracking_overlap(cell_tracking_overlap_input, publish_dir)
+    build_graphs(cell_tracking_overlap.out.results, publish_dir)
+
+    annotate_D2min(build_graphs.out.results, params.lag_times_minutes, params.minimum_neighbors, publish_dir)
+    cage_relative_squared_displacement(annotate_D2min.out.results, params.lag_times_minutes, publish_dir)
+
+    // graph dataset
+    all_graph_datasets = calculate_local_density(cage_relative_squared_displacement.out.results, publish_dir).collect()
 
     // dataframe
-    assemble_cell_track_dataframe(annotate_D2min.out.results, params.delta_t_minutes, params.include_attrs, params.exclude_attrs, parent_dir_out)
-    all_dataframes_list = add_cell_culture_metadata(assemble_cell_track_dataframe.out.results, params.provider, parent_dir_out).collect { _first, second -> second }
-    concatenate_tracking_dataframes(all_dataframes_list, parent_dir_out)
+    assemble_cell_track_dataframe(calculate_local_density.out.results, params.include_attrs, params.exclude_attrs, publish_dir)
+    all_dataframes_list = add_cell_culture_metadata(assemble_cell_track_dataframe.out.results, publish_dir).collect { _first, second, _third -> second }
+    concatenate_tracking_dataframes(all_dataframes_list, publish_dir)
 
     emit:
     all_cell_tracks_dataframe = concatenate_tracking_dataframes.out.results
-    all_graph_datasets        = all_graph_datasets // this is a list of tuples of the form [basename, path]
+    all_graph_datasets        = all_graph_datasets // this is a list of tuples of the form [basename, file, config]
 }
 
 process prepare_dataset_from_raw {
 
-    publishDir "${parent_dir_out}/${basename}", mode: 'copy'
+    publishDir "${publish_directory}/${basename}", mode: 'copy'
 
     label "low_cpu", "short_running"
 
     conda "${moduleDir}/environment.yml"
 
     input:
-    tuple val(basename), path(dataset_path)
-    val provider
-    val parent_dir_out
+    tuple val(basename), path(dataset_path), path(dataset_config)
+    val publish_directory
 
     output:
-    tuple val(basename), path("original_dataset.pickle"), emit: results
+    tuple val(basename), path("original_dataset.pickle"), path(dataset_config), emit: results
 
     script:
     """
@@ -91,7 +98,7 @@ process prepare_dataset_from_raw {
     python ${moduleDir}/scripts/prepare_dataset.py \
         --indir="${dataset_path}" \
         --outfile="original_dataset.pickle" \
-        --provider=${provider} \
+        --dataset_config="${dataset_config}" \
         --cpus=${task.cpus}
     """
 }
@@ -105,12 +112,11 @@ process add_cell_culture_metadata {
     conda "${moduleDir}/environment.yml"
 
     input:
-    tuple val(basename), path(cell_track_df_path)
-    val provider
+    tuple val(basename), path(cell_track_df_path), path(dataset_config)
     val parent_dir_out
 
     output:
-    tuple val(basename), path("cell_tracks_with_metadata.ipc"), emit: results
+    tuple val(basename), path("cell_tracks_with_metadata.ipc"), path(dataset_config), emit: results
 
     script:
     """
@@ -118,7 +124,7 @@ process add_cell_culture_metadata {
         --infile="${cell_track_df_path}" \
         --outfile="cell_tracks_with_metadata.ipc" \
         --basename=${basename} \
-        --provider=${provider} \
+        --dataset_config=${dataset_config} \
         --cpus=${task.cpus}
     """
 }
