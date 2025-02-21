@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 
 import polars as pl
+import toml
 
 
 def get_dataset_metadata(dataset_name: str, provider_name: str) -> tuple[str, str]:
@@ -47,7 +48,7 @@ if __name__ == "__main__":
         help="Path to write tracking dataframe to.",
     )
 
-    parser.add_argument("--provider", type=str, required=True)
+    parser.add_argument("--dataset_config", type=str, required=True)
     parser.add_argument("--basename", type=str, required=True)
 
     parser.add_argument(
@@ -60,9 +61,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     cell_tracking_df = pl.read_ipc(args.infile, memory_map=False)
+    dataset_config = toml.load(args.dataset_config)
+    provider = dataset_config["experimental-parameters"]["provider"]
 
     cell_line_name, cell_culture_methodology = get_dataset_metadata(
-        args.basename, args.provider
+        args.basename, provider_name=provider
     )
 
     # create 'cell_line_name' and 'cell_culture_methodology' columns in df
@@ -73,7 +76,7 @@ if __name__ == "__main__":
         pl.lit(cell_culture_methodology).alias("cell_culture_methodology")
     )
     cell_tracking_df = cell_tracking_df.with_columns(
-        pl.lit(args.provider.lower()).alias("dataset_provider")
+        pl.lit(provider.lower()).alias("dataset_provider")
     )
 
     cell_tracking_df.write_ipc(args.outfile, compression="lz4")
