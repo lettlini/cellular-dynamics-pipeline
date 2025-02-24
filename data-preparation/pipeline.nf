@@ -29,8 +29,8 @@ workflow data_preparation {
     nuclei_segmentation(prepare_dataset_from_raw.out.results, params.min_nucleus_area_mumsq, publish_dir)
     confluency_filter(nuclei_segmentation.out.results, "nuclei", publish_dir)
 
-    label_nuclei(nuclei_segmentation.out.results, "nuclei", publish_dir)
-    cell_approximation(nuclei_segmentation.out.results, params.cell_cutoff_mum, publish_dir)
+    label_nuclei(confluency_filter.out.results, "nuclei", publish_dir)
+    cell_approximation(confluency_filter.out.results, params.cell_cutoff_mum, publish_dir)
     label_cells(cell_approximation.out.results, "cells", publish_dir)
 
     structure_abstraction_input = label_nuclei.out.results
