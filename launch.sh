@@ -4,15 +4,16 @@
 #SBATCH --error=/home/sc.uni-leipzig.de/kl63sahy/nextflow/nextflow-logs/nextflow_%j.err        # Standard error log (%j will be replaced with the job ID)
 #SBATCH --ntasks=1                     # Number of tasks (we're running a single task, Nextflow will handle the rest)
 #SBATCH --cpus-per-task=1             # Number of CPU cores per task
-#SBATCH --mem=2G                     # Memory allocation per task (adjust as needed)
-#SBATCH --time=2-00:00:00
-#SBATCH --partition=paul           # Partition to submit to (adjust if needed)
+#SBATCH --mem=8G                     # Memory allocation per task (adjust as needed)
+#SBATCH --time=4-00:00:00
+#SBATCH --partition=polaris-long           # Partition to submit to (adjust if needed)
 
 OUTPUT_DIR=/home/sc.uni-leipzig.de/kl63sahy/nextflow/nextflow-reports/${SLURM_JOB_ID}/
 mkdir -p $OUTPUT_DIR  # Create the output directory if it doesn't exist
 
 # Load Nextflow module
 module load Nextflow
+module load libglvnd
 
 # Load Mamba module & make sure conda and mamba are on the path
 module load Mamba
