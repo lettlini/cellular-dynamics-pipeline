@@ -67,7 +67,8 @@ workflow data_preparation {
     cage_relative_squared_displacement(annotate_D2min.out.results, params.lag_times_minutes, publish_dir)
 
     // graph dataset
-    all_graph_datasets = calculate_local_density(cage_relative_squared_displacement.out.results, publish_dir).collect()
+    k_order_density(cage_relative_squared_displacement.out.results, publish_dir)
+    all_graph_datasets = calculate_local_density(k_order_density.out.results, publish_dir).collect()
 
     // dataframe
     assemble_cell_track_dataframe(calculate_local_density.out.results, params.include_attrs, params.exclude_attrs, publish_dir)
@@ -126,6 +127,32 @@ process add_cell_culture_metadata {
     python ${moduleDir}/scripts/add_dataset_metadata.py \
         --infile="${cell_track_df_path}" \
         --outfile="cell_tracks_with_metadata.ipc" \
+        --basename=${basename} \
+        --dataset_config=${dataset_config} \
+        --cpus=${task.cpus}
+    """
+}
+
+process k_order_density {
+
+    publishDir "${parent_dir_out}/${basename}", mode: 'copy'
+
+    label "high_cpu", "long_running"
+
+    conda "${moduleDir}/environment.yml"
+
+    input:
+    tuple val(basename), path(graph_ds), path(dataset_config)
+    val parent_dir_out
+
+    output:
+    tuple val(basename), path("graph_dataset_with_k_order_density.pickle"), path(dataset_config), emit: results
+
+    script:
+    """
+    python ${moduleDir}/scripts/k_order_density.py \
+        --infile="${graph_ds}" \
+        --outfile="graph_dataset_with_k_order_density.pickle" \
         --basename=${basename} \
         --dataset_config=${dataset_config} \
         --cpus=${task.cpus}
