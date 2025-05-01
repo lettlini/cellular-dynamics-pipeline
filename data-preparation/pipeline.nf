@@ -153,7 +153,6 @@ process k_order_density {
     python ${moduleDir}/scripts/k_order_density.py \
         --infile="${graph_ds}" \
         --outfile="graph_dataset_with_k_order_density.pickle" \
-        --basename=${basename} \
         --dataset_config=${dataset_config} \
         --cpus=${task.cpus}
     """
