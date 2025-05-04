@@ -3,6 +3,7 @@ import numpy as np
 from core_data_utils.datasets import BaseDataSet, BaseDataSetEntry
 from core_data_utils.transformations import BaseDataSetTransformation
 from argparse import ArgumentParser
+import multiprocessing as mp
 
 
 def get_k_fold_neighbors(G, node, k):
@@ -99,6 +100,8 @@ class GaussianDecayKFoldNeighborhoodDensity(AnnotateKFoldNeighborhoodDensity):
 
 
 if __name__ == "__main__":
+    
+    mp.set_start_method("spawn")
 
     parser = ArgumentParser()
     parser.add_argument("--infile", type=str, required=True)
