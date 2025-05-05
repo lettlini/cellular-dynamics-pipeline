@@ -137,7 +137,7 @@ process k_order_density {
 
     publishDir "${parent_dir_out}/${basename}", mode: 'copy'
 
-    label "high_cpu", "long_running"
+    label "high_memory", "long_running"
 
     conda "${moduleDir}/environment.yml"
 
