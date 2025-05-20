@@ -150,7 +150,7 @@ process k_order_density {
 
     script:
     """
-    python ${moduleDir}/scripts/k_order_density.py \
+    python ${moduleDir}/scripts/k_order_averages.py \
         --infile="${graph_ds}" \
         --outfile="graph_dataset_with_k_order_density.pickle" \
         --dataset_config=${dataset_config} \
