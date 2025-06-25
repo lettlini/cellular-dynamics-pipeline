@@ -1,18 +1,18 @@
-include { label_objects                          } from './cellular-dynamics-nf-modules/modules/image_processing/label_objects/main.nf'
-include { nuclei_segmentation                    } from './cellular-dynamics-nf-modules/modules/image_processing/nuclei_segmentation/main.nf'
-include { confluency_filter                      } from './cellular-dynamics-nf-modules/modules/image_processing/confluency_filter/main.nf'
-include { cell_approximation                     } from './cellular-dynamics-nf-modules/modules/image_processing/cell_approximation/main.nf'
+include { label_objects } from './cellular-dynamics-nf-modules/modules/image_processing/label_objects/main.nf'
+include { nuclei_segmentation_cellpose } from './cellular-dynamics-nf-modules/modules/image_processing/nuclei_segmentation_cellpose/main.nf'
+include { confluency_filter } from './cellular-dynamics-nf-modules/modules/image_processing/confluency_filter/main.nf'
+include { cell_approximation } from './cellular-dynamics-nf-modules/modules/image_processing/cell_approximation/main.nf'
 include { label_objects as label_nuclei ; label_objects as label_cells } from './cellular-dynamics-nf-modules/modules/image_processing/label_objects/main.nf'
-include { structure_abstraction                  } from './cellular-dynamics-nf-modules/modules/graph_processing/structure_abstraction/main.nf'
-include { cell_tracking_overlap                  } from './cellular-dynamics-nf-modules/modules/tracking/cell_tracking_overlap/main.nf'
-include { build_graphs                           } from './cellular-dynamics-nf-modules/modules/graph_processing/build_graphs/main.nf'
+include { structure_abstraction } from './cellular-dynamics-nf-modules/modules/graph_processing/structure_abstraction/main.nf'
+include { cell_tracking_overlap } from './cellular-dynamics-nf-modules/modules/tracking/cell_tracking_overlap/main.nf'
+include { build_graphs } from './cellular-dynamics-nf-modules/modules/graph_processing/build_graphs/main.nf'
 include { annotate_graph_theoretical_observables } from './cellular-dynamics-nf-modules/modules/graph_processing/annotate_graph_theoretical_observables/main.nf'
-include { annotate_neighbor_retention            } from './cellular-dynamics-nf-modules/modules/tracking/annotate_neighbor_retention/main.nf'
-include { annotate_D2min                         } from './cellular-dynamics-nf-modules/modules/tracking/annotate_D2min/main.nf'
-include { assemble_cell_track_dataframe          } from './cellular-dynamics-nf-modules/modules/tracking/assemble_cell_tracks_dataframe/main.nf'
-include { calculate_local_density                } from './cellular-dynamics-nf-modules/modules/graph_processing/calculate_local_density/main.nf'
-include { concatenate_tracking_dataframes        } from './cellular-dynamics-nf-modules/modules/tracking/concatenate_tracking_dataframes/main.nf'
-include { cage_relative_squared_displacement     } from './cellular-dynamics-nf-modules/modules/tracking/cage_relative_squared_displacement/main.nf'
+include { annotate_neighbor_retention } from './cellular-dynamics-nf-modules/modules/tracking/annotate_neighbor_retention/main.nf'
+include { annotate_D2min } from './cellular-dynamics-nf-modules/modules/tracking/annotate_D2min/main.nf'
+include { assemble_cell_track_dataframe } from './cellular-dynamics-nf-modules/modules/tracking/assemble_cell_tracks_dataframe/main.nf'
+include { calculate_local_density } from './cellular-dynamics-nf-modules/modules/graph_processing/calculate_local_density/main.nf'
+include { concatenate_tracking_dataframes } from './cellular-dynamics-nf-modules/modules/tracking/concatenate_tracking_dataframes/main.nf'
+include { cage_relative_squared_displacement } from './cellular-dynamics-nf-modules/modules/tracking/cage_relative_squared_displacement/main.nf'
 
 workflow data_preparation {
     take:
@@ -26,10 +26,10 @@ workflow data_preparation {
     new File(publish_dir).mkdirs()
 
     prepare_dataset_from_raw(input_datasets, publish_dir)
-    nuclei_segmentation(prepare_dataset_from_raw.out.results, params.min_nucleus_area_mumsq, publish_dir)
+    nuclei_segmentation_cellpose(prepare_dataset_from_raw.out.results, params.min_nucleus_area_mumsq, publish_dir)
 
 
-    confluency_filter(nuclei_segmentation.out.results, "nuclei", publish_dir)
+    confluency_filter(nuclei_segmentation_cellpose.out.results, "nuclei", publish_dir)
 
 
     label_nuclei(confluency_filter.out.results, "nuclei", publish_dir)
@@ -77,7 +77,7 @@ workflow data_preparation {
 
     emit:
     all_cell_tracks_dataframe = concatenate_tracking_dataframes.out.results
-    all_graph_datasets        = all_graph_datasets // this is a list of tuples of the form [basename, file, config]
+    all_graph_datasets = all_graph_datasets // this is a list of tuples of the form [basename, file, config]
 }
 
 process prepare_dataset_from_raw {
@@ -137,7 +137,7 @@ process k_order_density {
 
     publishDir "${parent_dir_out}/${basename}", mode: 'copy'
 
-    label "high_memory", "long_running"
+    label "high_memory", "long_running", "high_cpu"
 
     conda "${moduleDir}/environment.yml"
 
