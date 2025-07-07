@@ -3,7 +3,9 @@ channels:
   - conda-forge
   - pytorch
 dependencies:
-  - python=3.10
+  - python=3.12
+  - pytorch::cpuonly
+  - pytorch::pytorch
   - pip
   - pip:
     - opencv-python
@@ -12,5 +14,3 @@ dependencies:
     - numpy
     - toml
     - networkx
-    - cpuonly
-    - pytorch
