@@ -67,8 +67,7 @@ workflow data_preparation {
     cage_relative_squared_displacement(annotate_D2min.out.results, params.lag_times_minutes, publish_dir)
 
     // graph dataset
-    k_order_density(cage_relative_squared_displacement.out.results, publish_dir)
-    all_graph_datasets = calculate_local_density(k_order_density.out.results, publish_dir).collect()
+    all_graph_datasets = calculate_local_density(cage_relative_squared_displacement.out.results, publish_dir).collect()
 
     // dataframe
     assemble_cell_track_dataframe(calculate_local_density.out.results, params.include_attrs, params.exclude_attrs, publish_dir)
@@ -150,7 +149,7 @@ process k_order_density {
 
     script:
     """
-    python ${moduleDir}/scripts/k_order_averages.py \
+    python ${moduleDir}/scripts/k_order_density.py \
         --infile="${graph_ds}" \
         --outfile="graph_dataset_with_k_order_density.pickle" \
         --dataset_config=${dataset_config} \
