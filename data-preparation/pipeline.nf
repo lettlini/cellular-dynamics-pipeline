@@ -63,7 +63,8 @@ workflow data_preparation {
     cell_tracking_overlap(cell_tracking_overlap_input, publish_dir)
     build_graphs(cell_tracking_overlap.out.results, publish_dir)
 
-    annotate_D2min(build_graphs.out.results, params.lag_times_minutes, params.minimum_neighbors, publish_dir)
+    annotate_graph_theoretical_observables(build_graphs.out.results, publish_dir)
+    annotate_D2min(annotate_graph_theoretical_observables.out.results, params.lag_times_minutes, params.minimum_neighbors, publish_dir)
     cage_relative_squared_displacement(annotate_D2min.out.results, params.lag_times_minutes, publish_dir)
 
     // graph dataset
