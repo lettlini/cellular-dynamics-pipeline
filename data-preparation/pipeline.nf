@@ -69,6 +69,7 @@ workflow data_preparation {
 
     // graph dataset
     all_graph_datasets = calculate_local_density(cage_relative_squared_displacement.out.results, publish_dir).collect()
+    nx2torch(calculate_local_density.out.results, publish_dir)
 
     // dataframe
     assemble_cell_track_dataframe(calculate_local_density.out.results, params.include_attrs, params.exclude_attrs, publish_dir)
@@ -154,6 +155,33 @@ process k_order_density {
         --infile="${graph_ds}" \
         --outfile="graph_dataset_with_k_order_density.pickle" \
         --dataset_config=${dataset_config} \
+        --cpus=${task.cpus}
+    """
+}
+
+process nx2torch {
+    publishDir "${parent_dir_out}/${basename}", mode: 'copy'
+
+    label "single_threaded"
+
+    conda "${moduleDir}/environment.yml"
+
+    input:
+    tuple val(basename), path(graph_ds), path(dataset_config)
+    val parent_dir_out
+
+    output:
+    tuple val(basename), path("torch_dataset.pickle"), path(dataset_config), emit: results
+
+    script:
+    """
+    python ${moduleDir}/scripts/nx2torch.py \
+        --infile="${graph_ds}" \
+        --outfile="torch_dataset.pickle" \
+        --dataset_config=${dataset_config} \
+        --torch_node_properties=${params.torch_node_properties} \
+        --torch_edge_properties=${params.torch_edge_properties} \
+        --torch_target_properties=${params.torch_target_properties} \
         --cpus=${task.cpus}
     """
 }
