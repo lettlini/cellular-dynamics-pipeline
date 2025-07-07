@@ -12,4 +12,5 @@ dependencies:
     - numpy
     - toml
     - networkx
-    - pytorch::pytorch-cpu
+    - cpuonly
+    - pytorch
