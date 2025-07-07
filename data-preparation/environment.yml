@@ -1,6 +1,7 @@
 name: data-preparation_default
 channels:
   - conda-forge
+  - pytorch
 dependencies:
   - python=3.12
   - pip
@@ -11,3 +12,4 @@ dependencies:
     - numpy
     - toml
     - networkx
+    - pytorch::pytorch-cpu
