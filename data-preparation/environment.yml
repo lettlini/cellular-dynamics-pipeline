@@ -14,3 +14,4 @@ dependencies:
     - numpy
     - toml
     - networkx
+    - torch_geometric
