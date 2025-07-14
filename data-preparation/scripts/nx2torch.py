@@ -21,7 +21,7 @@ class Nx2TorchTransformation(BaseDataSetTransformation):
         self._edge_props = edge_properties
         super().__init__()
 
-    def _transform_single_entry(self, entry, _):
+    def _transform_single_entry(self, entry, dataset_properties):
         nx_graph = entry.data
 
         for _, ndat in nx_graph.nodes(data=True):
