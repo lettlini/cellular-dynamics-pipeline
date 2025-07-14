@@ -56,7 +56,7 @@ if __name__ == "__main__":
     parser.add_argument("--outfile", type=str, required=True)
     parser.add_argument("--torch_node_properties", type=str, required=True)
     parser.add_argument("--torch_edge_properties", type=str, required=True)
-    parser.add_argument("--torch_target_property", type=str, required=True)
+    parser.add_argument("--torch_target_properties", type=str, required=True)
 
     parser.add_argument(
         "--cpus",
