@@ -29,20 +29,23 @@ class Nx2TorchTransformation(BaseDataSetTransformation):
                 if (k not in self._node_props) and (k not in self._target_props):
                     del ndat[k]
 
-        ndat = from_networkx(
+        torch_data = from_networkx(
             nx_graph,
             group_node_attrs=self._node_props,
             group_edge_attrs=self._edge_props,
         )
-        ndat.y = torch.hstack(
-            [torch.reshape(ndat[tprop], shape=(-1, 1)) for tprop in self._target_props]
+        torch_data.y = torch.hstack(
+            [
+                torch.reshape(torch_data[tprop], shape=(-1, 1))
+                for tprop in self._target_props
+            ]
         )
 
         for tprop in self._target_props:
-            del ndat[tprop]
+            del torch_data[tprop]
 
         return BaseDataSetEntry(
-            identifier=entry.identifier, data=ndat, metadata=entry.metadata
+            identifier=entry.identifier, data=torch_data, metadata=entry.metadata
         )
 
 
