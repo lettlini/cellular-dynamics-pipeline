@@ -69,12 +69,13 @@ workflow data_preparation {
 
     // graph dataset
     all_graph_datasets = calculate_local_density(cage_relative_squared_displacement.out.results, publish_dir).collect()
-    nx2torch(calculate_local_density.out.results, publish_dir)
+    all_torch_datasets = nx2torch(calculate_local_density.out.results, publish_dir).collect { _first, second, _third -> second }
 
     // dataframe
     assemble_cell_track_dataframe(calculate_local_density.out.results, params.include_attrs, params.exclude_attrs, publish_dir)
     all_dataframes_list = add_cell_culture_metadata(assemble_cell_track_dataframe.out.results, publish_dir).collect { _first, second, _third -> second }
     concatenate_tracking_dataframes(all_dataframes_list, publish_dir)
+    merge_torch_datasets(all_torch_datasets, publish_dir)
 
     emit:
     all_cell_tracks_dataframe = concatenate_tracking_dataframes.out.results
@@ -183,5 +184,28 @@ process nx2torch {
         --torch_edge_properties=${params.torch_edge_properties} \
         --torch_target_properties=${params.torch_target_properties} \
         --cpus=${task.cpus}
+    """
+}
+
+process merge_torch_datasets {
+    publishDir "${publish_dir}", mode: 'copy'
+
+    label "single_threaded"
+
+    conda "${moduleDir}/environment.yml"
+
+    input:
+    val torch_ds_list
+    val publish_dir
+
+    output:
+    path "all_torch_datasets.ipc", emit: results
+
+    script:
+    """
+    echo '${torch_ds_list.join("\n")}' > file_list.txt
+    python ${moduleDir}/scripts/merge_torch.py \
+    --infile='./file_list.txt' \
+    --outfile='all_torch_datasets.pickle' \
     """
 }
