@@ -199,7 +199,7 @@ process merge_torch_datasets {
     val publish_dir
 
     output:
-    path "all_torch_datasets.ipc", emit: results
+    path "all_torch_datasets.pickle", emit: results
 
     script:
     """
